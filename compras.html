@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Compras — Quintal Goiano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #0f172a; --surface: #1e293b; --surface2: #334155;
+            --primary: #f59e0b; --primary-glow: rgba(245,158,11,0.15);
+            --success: #10b981; --danger: #ef4444; --text: #f8fafc;
+            --muted: #94a3b8; --border: rgba(255,255,255,0.06);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit', sans-serif; }
+        body { background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; padding: 24px; display: flex; flex-direction: column; border-right: 1px solid var(--border); background: linear-gradient(180deg, #0f172a 0%, rgba(30,41,59,0.5) 100%); position: fixed; top: 0; left: 0; height: 100vh; }
+        .brand { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700; color: var(--primary); margin-bottom: 36px; }
+        .nav-items { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 16px; border-radius: 12px; color: var(--muted); text-decoration: none; transition: all 0.2s; font-weight: 500; font-size: 14px; }
+        .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+        .nav-item.active { color: var(--primary); background: var(--primary-glow); border: 1px solid rgba(245,158,11,0.1); }
+        .main { margin-left: 260px; flex: 1; padding: 36px 40px; display: flex; flex-direction: column; gap: 24px; }
+        .glass { background: rgba(30,41,59,0.7); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 16px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 8px; }
+        .stat-card { padding: 20px; border-radius: 16px; display: flex; flex-direction: column; gap: 4px; }
+        .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 24px; font-weight: 700; }
+        .filters { display: flex; gap: 8px; margin-bottom: 8px; }
+        .filter-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+        .filter-btn.active { background: var(--primary-glow); color: var(--primary); border-color: rgba(245,158,11,0.2); }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; box-shadow: 0 4px 15px rgba(234,88,12,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); opacity: 0.95; }
+        .btn-ghost { background: var(--surface2); color: var(--text); }
+        .btn-ghost:hover { background: #475569; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; padding: 16px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+        td { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        tr:hover td { background: rgba(255,255,255,0.01); }
+        .badge { display: inline-flex; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge-critico { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+        .badge-alerta { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+        .badge-ok { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+        .status-select { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; outline: none; }
+        .empty-state { padding: 60px; text-align: center; color: var(--muted); }
+        .toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 24px; border-radius: 12px; color: #fff; font-weight: 600; z-index: 1000; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.3); animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @media print {
+            .sidebar, .filters, .btn, .nav-items, .brand, .status-col { display: none !important; }
+            .main { margin-left: 0; padding: 0; }
+            .glass { border: none; background: #fff; color: #000; }
+            th, td { color: #000; border-bottom: 1px solid #ddd; }
+            .badge { border: 1px solid #000; color: #000 !important; background: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand"><i data-lucide="flame"></i> Quintal Goiano</div>
+        <nav class="nav-items">
+            <a href="dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a href="rotina.html" class="nav-item"><i data-lucide="calendar-check"></i> Rotina</a>
+            <a href="notas.html" class="nav-item"><i data-lucide="receipt"></i> Notas Fiscais</a>
+            <a href="fichas.html" class="nav-item"><i data-lucide="chef-hat"></i> Fichas Técnicas</a>
+            <a href="insumos.html" class="nav-item"><i data-lucide="package"></i> Insumos</a>
+            <a href="estoque.html" class="nav-item"><i data-lucide="package-open"></i> Estoque</a>
+            <a href="compras.html" class="nav-item active"><i data-lucide="shopping-cart"></i> Lista de Compras</a>
+            <a href="vendas.html" class="nav-item"><i data-lucide="shopping-bag"></i> Vendas</a>
+            <a href="desperdicio.html" class="nav-item"><i data-lucide="trash-2"></i> Desperdício</a>
+            <a href="configuracoes.html" class="nav-item" style="margin-top:auto;"><i data-lucide="settings"></i> Configurações</a>
+        
+        <a href="#" class="nav-item" onclick="logout()" style="margin-top:auto; color: #ef4444;">
+            <i data-lucide="log-out"></i> Sair
+        </a>
+    </nav>
+    </aside>
+
+    <main class="main">
+        <header class="header">
+            <div>
+                <h1 style="font-size:28px; font-weight:700;">Lista de Compras</h1>
+                <p style="color:var(--muted); font-size:14px;">Insumos que atingiram o nível de alerta ou crítico</p>
+            </div>
+            <div style="display:flex; gap:12px;">
+                <button class="btn btn-ghost" onclick="window.print()"><i data-lucide="printer"></i> Imprimir</button>
+                <button class="btn btn-primary" onclick="gerarLista()"><i data-lucide="refresh-cw"></i> Gerar Lista</button>
+            </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="glass stat-card">
+                <span class="stat-label">Itens Pendentes</span>
+                <span class="stat-value" id="count-pendentes">0</span>
+            </div>
+            <div class="glass stat-card">
+                <span class="stat-label">Custo Estimado</span>
+                <span class="stat-value" id="custo-total">R$ 0,00</span>
+            </div>
+            <div class="glass stat-card" style="border-left: 4px solid var(--danger);">
+                <span class="stat-label">Urgência Crítica</span>
+                <span class="stat-value" id="count-criticos" style="color:var(--danger)">0</span>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterList('todos', this)">Todos</button>
+            <button class="filter-btn" onclick="filterList('pendente', this)">Pendentes</button>
+            <button class="filter-btn" onclick="filterList('comprado', this)">Comprados</button>
+            <button class="filter-btn" onclick="filterList('ignorado', this)">Ignorados</button>
+        </div>
+
+        <div class="glass" style="overflow: hidden;">
+            <table id="compras-table">
+                <thead>
+                    <tr>
+                        <th>Insumo</th>
+                        <th>Quantidade</th>
+                        <th>Fornecedor Sugerido</th>
+                        <th>Preço Est.</th>
+                        <th>Estoque</th>
+                        <th class="status-col">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="compras-tbody">
+                    <!-- JS -->
+                </tbody>
+            </table>
+            <div id="empty-alert" class="empty-state" style="display:none;">
+                <i data-lucide="shopping-cart" size="48" style="margin-bottom:16px; opacity:0.2;"></i>
+                <p>Nenhum item na lista de compras hoje.</p>
+                <p style="font-size:13px; margin-top:8px;">Clique em "Gerar Lista" para calcular as necessidades.</p>
+            </div>
+        </div>
+
+        <div id="sem-historico-section" style="margin-top:24px; display:none;">
+            <h3 style="font-size:16px; margin-bottom:12px; color:var(--muted); display:flex; align-items:center; gap:8px;">
+                <i data-lucide="alert-circle" size="18"></i> Insumos sem histórico de consumo
+            </h3>
+            <div class="glass" style="padding:16px; font-size:14px; color:var(--muted);">
+                Estes itens possuem estoque mínimo mas nunca foram movimentados no sistema. Verifique manualmente:
+                <div id="sem-historico-list" style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const API = '/api';
+        let fullList = [];
+
+        async function loadData() {
+            try {
+                const res = await fetch(`${API}/lista-compras/hoje`);
+                const data = await res.json();
+                fullList = data.itens || [];
+                renderList(fullList);
+                renderStats(data);
+                renderSemHistorico(data.sem_historico || []);
+            } catch (err) {
+                showToast("Erro ao carregar lista", "err");
+            }
+        }
+
+        function renderList(list) {
+            const tbody = document.getElementById('compras-tbody');
+            const empty = document.getElementById('empty-alert');
+            tbody.innerHTML = '';
+            
+            if (list.length === 0) {
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+
+            list.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.dataset.status = item.status;
+                
+                let badgeClass = 'badge-ok';
+                if (item.urgencia === 'critica' || item.dias_restantes < 1) badgeClass = 'badge-critico';
+                else if (item.dias_restantes < 2) badgeClass = 'badge-alerta';
+
+                tr.innerHTML = `
+                    <td style="font-weight:600;">${item.insumo_nome}</td>
+                    <td>${item.quantidade} ${item.unidade}</td>
+                    <td style="color:var(--muted)">${item.fornecedor_nome || '---'}</td>
+                    <td style="font-weight:600;">R$ ${item.preco_estimado.toFixed(2)}</td>
+                    <td><span class="badge ${badgeClass}">${item.dias_restantes} dias</span></td>
+                    <td class="status-col">
+                        <select class="status-select" onchange="updateStatus(${item.id}, this.value)">
+                            <option value="pendente" ${item.status === 'pendente' ? 'selected' : ''}>Pendente</option>
+                            <option value="comprado" ${item.status === 'comprado' ? 'selected' : ''}>Comprado</option>
+                            <option value="ignorado" ${item.status === 'ignorado' ? 'selected' : ''}>Ignorado</option>
+                        </select>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function renderStats(data) {
+            document.getElementById('count-pendentes').innerText = fullList.filter(i => i.status === 'pendente').length;
+            document.getElementById('custo-total').innerText = `R$ ${data.custo_total_estimado.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            document.getElementById('count-criticos').innerText = fullList.filter(i => i.urgencia === 'critica').length;
+        }
+
+        function renderSemHistorico(list) {
+            const section = document.getElementById('sem-historico-section');
+            const container = document.getElementById('sem-historico-list');
+            if (list.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            section.style.display = 'block';
+            container.innerHTML = list.map(i => `
+                <span style="background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:6px; border:1px solid var(--border);">${i.nome}</span>
+            `).join('');
+        }
+
+        async function gerarLista() {
+            showToast("Gerando nova lista...", "ok");
+            try {
+                await fetch(`${API}/lista-compras/gerar`);
+                await loadData();
+            } catch (err) {
+                showToast("Erro ao gerar lista", "err");
+            }
+        }
+
+        async function updateStatus(id, newStatus) {
+            try {
+                const res = await fetch(`${API}/lista-compras/${id}/status`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({status: newStatus})
+                });
+                if (res.ok) {
+                    showToast("Status atualizado", "ok");
+                    // Update local list to avoid full reload
+                    const item = fullList.find(i => i.id === id);
+                    if (item) item.status = newStatus;
+                    renderStats({custo_total_estimado: fullList.reduce((acc, i) => acc + (i.status === 'pendente' ? i.preco_estimado : 0), 0)});
+                }
+            } catch (err) {
+                showToast("Erro ao atualizar", "err");
+            }
+        }
+
+        function filterList(status, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            if (status === 'todos') {
+                renderList(fullList);
+            } else {
+                renderList(fullList.filter(i => i.status === status));
+            }
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.className = `toast ${type}`;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
+
+        window.onload = () => {
+            loadData();
+            lucide.createIcons();
+        };
+    </script>
+
+<script>
+// Guard de autenticação — redireciona para login se sem sessão
+(async function() {
+    try {
+        const res = await fetch('/api/auth/verificar', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.ok) window.location.href = '/login.html';
+    } catch (e) {
+        window.location.href = '/login.html';
+    }
+})();
+
+// Injeta API Key em todas as chamadas fetch automaticamente
+const _fetchOriginal = window.fetch;
+window.fetch = function(url, opts = {}) {
+    const token = sessionStorage.getItem('cmv_token');
+    const apiKey = sessionStorage.getItem('cmv_api_key') || '';
+    if (typeof url === 'string' && url.includes('/api/')) {
+        opts.headers = {
+            ...(opts.headers || {}),
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+        };
+        opts.credentials = 'include';
+    }
+    return _fetchOriginal(url, opts);
+};
+
+async function logout() {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    sessionStorage.clear();
+    window.location.href = '/login.html';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desperdício — CMV Quintal Goiano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #0f172a; --surface: #1e293b; --surface2: #334155;
+            --primary: #f59e0b; --primary-glow: rgba(245,158,11,0.15);
+            --success: #10b981; --danger: #ef4444; --text: #f8fafc; --muted: #94a3b8; --border: rgba(255,255,255,0.06);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
+        body { background:var(--bg); color:var(--text); display:flex; min-height:100vh; }
+        .sidebar { width:260px; padding:24px; display:flex; flex-direction:column; border-right:1px solid var(--border); background:linear-gradient(180deg,#0f172a 0%,rgba(30,41,59,0.5) 100%); position:fixed; top:0; left:0; height:100vh; }
+        .brand { display:flex; align-items:center; gap:12px; font-size:22px; font-weight:700; color:var(--primary); margin-bottom:36px; }
+        .nav-items { display:flex; flex-direction:column; gap:6px; flex:1; }
+        .nav-item { display:flex; align-items:center; gap:12px; padding:11px 16px; border-radius:12px; color:var(--muted); text-decoration:none; transition:all 0.2s; font-weight:500; font-size:14px; }
+        .nav-item:hover { color:var(--text); background:rgba(255,255,255,0.05); }
+        .nav-item.active { color:var(--primary); background:var(--primary-glow); border:1px solid rgba(245,158,11,0.1); }
+        .main { margin-left:260px; flex:1; padding:36px 40px; display:flex; flex-direction:column; gap:28px; }
+        .glass { background:rgba(30,41,59,0.7); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:16px; }
+
+        .waste-grid { display:grid; grid-template-columns:1fr 1.5fr; gap:24px; }
+        .section-title { font-size:18px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+
+        .form-waste { padding:24px; }
+        .form-group { margin-bottom:16px; }
+        label { display:block; font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; margin-bottom:6px; }
+        select, input, textarea { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:var(--text); font-size:14px; outline:none; }
+        select:focus, input:focus, textarea:focus { border-color:var(--primary); }
+
+        .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:10px; border:none; font-weight:600; cursor:pointer; font-size:14px; transition:all 0.2s; }
+        .btn-primary { background:linear-gradient(135deg,#f59e0b,#ea580c); color:#fff; }
+        .btn-danger { background:rgba(239,68,68,0.1); color:#ef4444; }
+
+        .waste-card { padding:16px 20px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,0.02); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
+        .waste-info { display:flex; flex-direction:column; gap:4px; }
+        .waste-meta { font-size:12px; color:var(--muted); }
+        .waste-item { font-size:14px; font-weight:600; }
+        .waste-cost { font-weight:700; color:var(--danger); }
+
+        .impact-card { padding:20px; text-align:center; display:flex; flex-direction:column; gap:8px; }
+        .impact-value { font-size:32px; font-weight:800; color:var(--danger); }
+
+        .toast { position:fixed; bottom:24px; right:24px; padding:14px 20px; border-radius:12px; font-weight:600; font-size:14px; z-index:999; display:none; }
+        .toast.ok { background:#10b981; color:#fff; }
+        .toast.err { background:#ef4444; color:#fff; }
+
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+        .fade-in { animation:fadeIn 0.4s ease forwards; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand"><i data-lucide="flame"></i> Quintal Goiano</div>
+        <nav class="nav-items">
+            <a href="dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a href="rotina.html" class="nav-item"><i data-lucide="calendar-check"></i> Rotina</a>
+            <a href="notas.html" class="nav-item"><i data-lucide="receipt"></i> Notas Fiscais</a>
+            <a href="fichas.html" class="nav-item"><i data-lucide="chef-hat"></i> Fichas Técnicas</a>
+            <a href="insumos.html" class="nav-item"><i data-lucide="package"></i> Insumos</a>
+            <a href="estoque.html" class="nav-item"><i data-lucide="package-open"></i> Estoque</a>
+            <a href="compras.html" class="nav-item"><i data-lucide="shopping-cart"></i> Lista de Compras</a>
+            <a href="vendas.html" class="nav-item"><i data-lucide="shopping-bag"></i> Vendas</a>
+            <a href="desperdicio.html" class="nav-item active"><i data-lucide="trash-2"></i> Desperdício</a>
+            <a href="configuracoes.html" class="nav-item" style="margin-top:auto;"><i data-lucide="settings"></i> Configurações</a>
+        
+        <a href="#" class="nav-item" onclick="logout()" style="margin-top:auto; color: #ef4444;">
+            <i data-lucide="log-out"></i> Sair
+        </a>
+    </nav>
+    </aside>
+
+    <main class="main">
+        <div class="fade-in">
+            <h1 style="font-size:26px;font-weight:700;">Análise de Desperdício</h1>
+            <p style="color:var(--muted);font-size:14px;margin-top:4px;">Registre perdas por prato ou por insumo para identificar falhas operacionais</p>
+        </div>
+
+        <div class="waste-grid">
+            <!-- Formulário de Registro -->
+            <div class="glass form-waste fade-in">
+                <div class="section-title"><i data-lucide="alert-circle"></i> Registrar Perda</div>
+                
+                <div class="form-group">
+                    <label>Tipo de Perda</label>
+                    <div style="display:flex;gap:10px;margin-top:8px;">
+                        <button id="btn-tipo-insumo" class="btn btn-ghost" onclick="setTipo('insumo')" style="flex:1;">Por Insumo</button>
+                        <button id="btn-tipo-prato" class="btn btn-ghost" onclick="setTipo('prato')" style="flex:1;">Por Prato</button>
+                    </div>
+                </div>
+
+                <div class="form-group" id="group-insumo">
+                    <label>Insumo</label>
+                    <select id="select-insumo">
+                        <option value="">Selecione o insumo...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="group-prato" style="display:none;">
+                    <label>Prato Pronto</label>
+                    <select id="select-prato">
+                        <option value="">Selecione o prato...</option>
+                    </select>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="form-group">
+                        <label>Quantidade</label>
+                        <input type="number" id="waste-qtd" step="0.01" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Motivo</label>
+                        <select id="waste-motivo">
+                            <option>Validade Vencida</option>
+                            <option>Erro de Preparo</option>
+                            <option>Queda / Quebra</option>
+                            <option>Qualidade Ruim</option>
+                            <option>Outros</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Observações</label>
+                    <textarea id="waste-obs" rows="2" placeholder="Detalhes adicionais..."></textarea>
+                </div>
+
+                <button class="btn btn-primary" onclick="registrarPerda()" style="width:100%;justify-content:center;margin-top:10px;">
+                    <i data-lucide="save"></i> Salvar Registro de Perda
+                </button>
+            </div>
+
+            <!-- Histórico e Impacto -->
+            <div style="display:flex;flex-direction:column;gap:24px;">
+                <div class="glass impact-card fade-in">
+                    <label>Impacto Financeiro (Hoje)</label>
+                    <div class="impact-value" id="total-perda-hoje">R$ 0,00</div>
+                    <p style="font-size:12px;color:var(--muted);">Este valor aumenta diretamente o seu CMV Real.</p>
+                </div>
+
+                <div class="glass fade-in" style="padding:24px;flex:1;">
+                    <div class="section-title"><i data-lucide="history"></i> Perdas de Hoje</div>
+                    <div id="waste-history">
+                        <div style="color:var(--muted);text-align:center;padding:40px;">Nenhuma perda registrada hoje.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API = '/api';
+        lucide.createIcons();
+        let tipoAtual = 'insumo';
+
+        function setTipo(t) {
+            tipoAtual = t;
+            document.getElementById('btn-tipo-insumo').style.border = t === 'insumo' ? '1px solid var(--primary)' : 'none';
+            document.getElementById('btn-tipo-prato').style.border = t === 'prato' ? '1px solid var(--primary)' : 'none';
+            document.getElementById('group-insumo').style.display = t === 'insumo' ? 'block' : 'none';
+            document.getElementById('group-prato').style.display = t === 'prato' ? 'block' : 'none';
+        }
+
+        async function carregarDados() {
+            try {
+                const insumos = await fetch(`${API}/insumos`).then(r => r.json());
+                const selectIns = document.getElementById('select-insumo');
+                insumos.forEach(i => {
+                    const opt = document.createElement('option');
+                    opt.value = i.id; opt.textContent = `${i.nome} (${i.unidade})`;
+                    selectIns.appendChild(opt);
+                });
+
+                const pratos = await fetch(`${API}/pratos`).then(r => r.json());
+                const selectPrato = document.getElementById('select-prato');
+                pratos.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id; opt.textContent = p.nome;
+                    selectPrato.appendChild(opt);
+                });
+            } catch (e) {}
+        }
+
+        async function carregarHistorico() {
+            try {
+                const res = await fetch(`${API}/desperdicio/hoje`);
+                const perdas = await res.json();
+                
+                const list = document.getElementById('waste-history');
+                let total = 0;
+
+                if (!perdas.length) {
+                    list.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px;">Nenhuma perda hoje.</div>';
+                    document.getElementById('total-perda-hoje').textContent = 'R$ 0,00';
+                    return;
+                }
+
+                list.innerHTML = perdas.map(p => {
+                    total += p.custo_estimado || 0;
+                    return `
+                        <div class="waste-card">
+                            <div class="waste-info">
+                                <div class="waste-item">${p.item_nome}</div>
+                                <div class="waste-meta">${p.quantidade} ${p.unidade || ''} • ${p.motivo}</div>
+                            </div>
+                            <div class="waste-cost">R$ ${p.custo_estimado.toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('total-perda-hoje').textContent = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            } catch (e) {}
+        }
+
+        async function registrarPerda() {
+            const payload = {
+                tipo: tipoAtual,
+                item_id: tipoAtual === 'insumo' ? document.getElementById('select-insumo').value : document.getElementById('select-prato').value,
+                quantidade: parseFloat(document.getElementById('waste-qtd').value),
+                motivo: document.getElementById('waste-motivo').value,
+                observacao: document.getElementById('waste-obs').value
+            };
+
+            if (!payload.item_id || isNaN(payload.quantidade)) {
+                toast('Preencha os campos obrigatórios.', 'err');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/desperdicio`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    toast('Perda registrada com sucesso!', 'ok');
+                    carregarHistorico();
+                    document.getElementById('waste-qtd').value = '';
+                    document.getElementById('waste-obs').value = '';
+                } else {
+                    toast(data.erro, 'err');
+                }
+            } catch (e) {
+                toast('Erro ao conectar com a API.', 'err');
+            }
+        }
+
+        function toast(msg, tipo) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = `toast ${tipo}`;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        setTipo('insumo');
+        carregarDados();
+        carregarHistorico();
+    </script>
+
+<script>
+// Guard de autenticação — redireciona para login se sem sessão
+(async function() {
+    try {
+        const res = await fetch('/api/auth/verificar', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.ok) window.location.href = '/login.html';
+    } catch (e) {
+        window.location.href = '/login.html';
+    }
+})();
+
+// Injeta API Key em todas as chamadas fetch automaticamente
+const _fetchOriginal = window.fetch;
+window.fetch = function(url, opts = {}) {
+    const token = sessionStorage.getItem('cmv_token');
+    const apiKey = sessionStorage.getItem('cmv_api_key') || '';
+    if (typeof url === 'string' && url.includes('/api/')) {
+        opts.headers = {
+            ...(opts.headers || {}),
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+        };
+        opts.credentials = 'include';
+    }
+    return _fetchOriginal(url, opts);
+};
+
+async function logout() {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    sessionStorage.clear();
+    window.location.href = '/login.html';
+}
+</script>
+</body>
+</html>

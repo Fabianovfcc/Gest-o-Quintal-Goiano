@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quintal Goiano - Dashboard CMV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a; /* Slate 900 */
+            --surface-color: #1e293b; /* Slate 800 */
+            --surface-color-light: #334155; /* Slate 700 */
+            --primary-color: #f59e0b; /* Amber 500 - Goiano feel */
+            --primary-glow: rgba(245, 158, 11, 0.2);
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --text-main: #f8fafc; /* Slate 50 */
+            --text-muted: #94a3b8; /* Slate 400 */
+            --border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism utility */
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            background: linear-gradient(180deg, rgba(15,23,42,1) 0%, rgba(30,41,59,0.5) 100%);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 40px;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            background: var(--primary-glow);
+            border: 1px solid rgba(245, 158, 11, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 32px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            overflow-y: auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface-color);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-color-light);
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .kpi-card {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .kpi-card:hover::before {
+            opacity: 1;
+        }
+
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .icon-amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .icon-emerald { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .icon-blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .icon-rose { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
+
+        .kpi-title {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .kpi-trend {
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .trend-up { color: var(--success-color); }
+        .trend-down { color: var(--danger-color); }
+
+        /* Charts & Tables Area */
+        .dashboard-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .chart-container {
+            padding: 24px;
+            height: 380px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Top Pratos */
+        .top-pratos {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .prato-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .prato-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .prato-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .prato-rank {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--surface-color-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .rank-1 { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .rank-2 { background: rgba(148, 163, 184, 0.2); color: #94a3b8; }
+        .rank-3 { background: rgba(180, 83, 9, 0.2); color: #b45309; }
+
+        .prato-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .prato-cmv {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .cmv-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .cmv-good { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .cmv-warn { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <i data-lucide="flame"></i> Quintal Goiano
+        </div>
+        <nav class="nav-items">
+            <a href="dashboard.html" class="nav-item active"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a href="rotina.html" class="nav-item"><i data-lucide="calendar-check"></i> Rotina</a>
+            <a href="notas.html" class="nav-item"><i data-lucide="receipt"></i> Notas Fiscais</a>
+            <a href="fichas.html" class="nav-item"><i data-lucide="chef-hat"></i> Fichas Técnicas</a>
+            <a href="insumos.html" class="nav-item"><i data-lucide="package"></i> Insumos</a>
+            <a href="estoque.html" class="nav-item"><i data-lucide="package-open"></i> Estoque</a>
+            <a href="compras.html" class="nav-item"><i data-lucide="shopping-cart"></i> Lista de Compras</a>
+            <a href="vendas.html" class="nav-item"><i data-lucide="shopping-bag"></i> Vendas</a>
+            <a href="desperdicio.html" class="nav-item"><i data-lucide="trash-2"></i> Desperdício</a>
+            <a href="configuracoes.html" class="nav-item" style="margin-top:auto;"><i data-lucide="settings"></i> Configurações</a>
+        
+        <a href="#" class="nav-item" onclick="logout()" style="margin-top:auto; color: #ef4444;">
+            <i data-lucide="log-out"></i> Sair
+        </a>
+    </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header animate-in">
+            <div>
+                <h1>Visão Geral do Negócio</h1>
+                <p>Análise de CMV e Faturamento • Período: 27/04 a 30/04/2026 (99Food)</p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="location.href='notas.html'"><i data-lucide="upload"></i> Subir NF-e</button>
+                <button class="btn btn-primary" onclick="window.open('/api/relatorio/pdf')"><i data-lucide="download"></i> Relatório PDF</button>
+            </div>
+        </header>
+
+        <!-- Banner de alertas pendentes (oculto por padrão) -->
+        <div id="banner-pendentes" style="display:none; align-items:center; gap:12px; padding:14px 20px; border-radius:12px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); font-size:14px; color:#f59e0b;">
+            <i data-lucide="alert-triangle"></i>
+            <span>Carregando...</span>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+            <div class="glass kpi-card animate-in delay-1">
+                <div class="kpi-icon icon-amber"><i data-lucide="circle-dollar-sign"></i></div>
+                <div class="kpi-title">Receita Total (Plataforma)</div>
+                <div class="kpi-value" id="kpi-receita">Carregando...</div>
+                <div class="kpi-trend trend-up"><i data-lucide="arrow-up-right" size="14"></i> Período 27/04–30/04</div>
+            </div>
+            <div class="glass kpi-card animate-in delay-2">
+                <div class="kpi-icon icon-blue"><i data-lucide="shopping-bag"></i></div>
+                <div class="kpi-title">Total de Pedidos</div>
+                <div class="kpi-value" id="kpi-pedidos">Carregando...</div>
+                <div class="kpi-trend trend-up"><i data-lucide="arrow-up-right" size="14"></i> 99Food • 4 dias</div>
+            </div>
+            <div class="glass kpi-card animate-in delay-3">
+                <div class="kpi-icon icon-emerald"><i data-lucide="pie-chart"></i></div>
+                <div class="kpi-title">CMV Teórico Médio</div>
+                <div class="kpi-value" id="kpi-cmv">Carregando...</div>
+                <div class="kpi-trend" id="kpi-pendentes-trend" style="color:#94a3b8;"><i data-lucide="info" size="14"></i> <span id="kpi-pendentes">—</span></div>
+            </div>
+            <div class="glass kpi-card animate-in delay-4">
+                <div class="kpi-icon icon-rose"><i data-lucide="alert-circle"></i></div>
+                <div class="kpi-title">Itens Críticos</div>
+                <div class="kpi-value" id="kpi-criticos">0</div>
+                <div class="kpi-trend trend-down" style="cursor:pointer" onclick="location.href='compras.html'">
+                    <i data-lucide="shopping-cart" size="14"></i> Ver lista de compras
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="dashboard-row">
+            <!-- Chart -->
+            <div class="glass chart-container animate-in delay-2">
+                <div class="section-header">
+                    <div class="section-title">Faturamento vs Custos Diários</div>
+                    <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">Últimos 4 dias <i data-lucide="chevron-down" size="14"></i></button>
+                </div>
+                <canvas id="cmvChart"></canvas>
+            </div>
+
+            <!-- Top Pratos -->
+            <div class="glass top-pratos animate-in delay-3">
+                <div class="section-header">
+                    <div class="section-title">Análise de Fichas (Estimativa)</div>
+                </div>
+                
+                <div class="prato-item">
+                    <div class="prato-info">
+                        <div class="prato-rank rank-1">1</div>
+                        <div>
+                            <div class="prato-name">Marmita Goiana Simples</div>
+                            <div class="prato-cmv">Custo Est.: R$ 9,50</div>
+                        </div>
+                    </div>
+                    <div class="cmv-badge cmv-good">CMV: 28%</div>
+                </div>
+
+                <div class="prato-item">
+                    <div class="prato-info">
+                        <div class="prato-rank rank-2">2</div>
+                        <div>
+                            <div class="prato-name">Strogonoff de Frango</div>
+                            <div class="prato-cmv">Custo Est.: R$ 12,20</div>
+                        </div>
+                    </div>
+                    <div class="cmv-badge cmv-good">CMV: 31%</div>
+                </div>
+
+                <div class="prato-item">
+                    <div class="prato-info">
+                        <div class="prato-rank rank-3">3</div>
+                        <div>
+                            <div class="prato-name">Costelinha do Quintal</div>
+                            <div class="prato-cmv">Custo Est.: R$ 16,80</div>
+                        </div>
+                    </div>
+                    <div class="cmv-badge cmv-warn">CMV: 36%</div>
+                </div>
+
+                <div class="prato-item">
+                    <div class="prato-info">
+                        <div class="prato-rank">4</div>
+                        <div>
+                            <div class="prato-name">Palitinho Goiano (Provolone)</div>
+                            <div class="prato-cmv">Custo Est.: R$ 8,50</div>
+                        </div>
+                    </div>
+                    <div class="cmv-badge cmv-good">CMV: 26%</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API = '/api';
+        lucide.createIcons();
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Outfit', sans-serif";
+
+        const fmt = (v) => v != null
+            ? `R$ ${parseFloat(v).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`
+            : '—';
+
+        let cmvChart = null;
+
+        function renderChart(vendas) {
+            const ctx = document.getElementById('cmvChart').getContext('2d');
+            if (cmvChart) cmvChart.destroy();
+            cmvChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: vendas.map(v => `${v.dia_semana.slice(0,3)} (${v.data.slice(8,10)}/${v.data.slice(5,7)})`),
+                    datasets: [
+                        {
+                            label: 'Faturamento Bruto (R$)',
+                            data: vendas.map(v => v.faturamento_bruto),
+                            backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                            borderRadius: 6,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        },
+                        {
+                            label: 'Comissão Plataforma (R$)',
+                            data: vendas.map(v => v.comissao_plataforma),
+                            backgroundColor: 'rgba(244, 63, 94, 0.85)',
+                            borderRadius: 6,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        },
+                        {
+                            type: 'line',
+                            label: 'Receita Total 99Food (R$)',
+                            data: vendas.map(v => v.receita_total_plat),
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointBackgroundColor: '#10b981'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                            titleColor: '#fff', bodyColor: '#cbd5e1',
+                            borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, padding: 12
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false } },
+                        x: { grid: { display: false }, border: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function setKPI(id, value) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+        }
+
+        async function carregarDashboard() {
+            try {
+                // KPIs
+                const kpis = await fetch(`${API}/dashboard/kpis`).then(r => r.json());
+                setKPI('kpi-receita',    fmt(kpis.receita_plataforma));
+                setKPI('kpi-pedidos',    kpis.total_pedidos);
+                setKPI('kpi-cmv',        kpis.cmv_teorico ? kpis.cmv_teorico + '%' : 'Pendente');
+                setKPI('kpi-pendentes',  kpis.insumos_pendentes + ' insumos');
+
+                // Carregar Itens Críticos da API de Rotina
+                const rotinaRes = await fetch(`${API}/rotina/kpis`);
+                const rotinaData = await rotinaRes.json();
+                setKPI('kpi-criticos', rotinaData.insumos_criticos);
+                
+                const criticoEl = document.getElementById('kpi-criticos');
+                if (rotinaData.insumos_criticos > 0 && criticoEl) {
+                   criticoEl.style.color = 'var(--danger-color)';
+                }
+
+                // Alertar se há insumos pendentes
+                const banner = document.getElementById('banner-pendentes');
+                if (kpis.insumos_pendentes > 0 && banner) {
+                    banner.style.display = 'flex';
+                    banner.querySelector('span').textContent =
+                        `⚠️  ${kpis.insumos_pendentes} insumos sem custo cadastrado — o CMV real não pode ser calculado ainda.`;
+                }
+
+                // Gráfico
+                const vendas = await fetch(`${API}/dashboard/vendas-diarias`).then(r => r.json());
+                renderChart(vendas);
+
+                lucide.createIcons();
+            } catch (err) {
+                console.warn('[CMV] API offline:', err);
+                ['kpi-receita','kpi-pedidos','kpi-cmv','kpi-criticos'].forEach(id => setKPI(id, '—'));
+                setKPI('kpi-pendentes', '');
+                const banner = document.getElementById('banner-pendentes');
+                if (banner) {
+                    banner.style.display = 'flex';
+                    banner.style.background = 'rgba(239,68,68,0.08)';
+                    banner.style.borderColor = 'rgba(239,68,68,0.25)';
+                    banner.style.color = '#ef4444';
+                    banner.querySelector('span').textContent =
+                        'API offline — inicie o servidor Flask: python backend/app.py';
+                }
+                lucide.createIcons();
+            }
+        }
+
+        carregarDashboard();
+    </script>
+
+<script>
+// Guard de autenticação — redireciona para login se sem sessão
+(async function() {
+    try {
+        const res = await fetch('/api/auth/verificar', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.ok) window.location.href = '/login.html';
+    } catch (e) {
+        window.location.href = '/login.html';
+    }
+})();
+
+// Injeta API Key em todas as chamadas fetch automaticamente
+const _fetchOriginal = window.fetch;
+window.fetch = function(url, opts = {}) {
+    const token = sessionStorage.getItem('cmv_token');
+    const apiKey = sessionStorage.getItem('cmv_api_key') || '';
+    if (typeof url === 'string' && url.includes('/api/')) {
+        opts.headers = {
+            ...(opts.headers || {}),
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+        };
+        opts.credentials = 'include';
+    }
+    return _fetchOriginal(url, opts);
+};
+
+async function logout() {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    sessionStorage.clear();
+    window.location.href = '/login.html';
+}
+</script>
+</body>
+</html>

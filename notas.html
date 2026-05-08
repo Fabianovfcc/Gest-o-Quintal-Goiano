@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notas Fiscais — CMV Quintal Goiano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #0f172a; --surface: #1e293b; --surface2: #334155;
+            --primary: #f59e0b; --primary-glow: rgba(245,158,11,0.15);
+            --success: #10b981; --danger: #ef4444; --warn: #f59e0b;
+            --text: #f8fafc; --muted: #94a3b8; --border: rgba(255,255,255,0.06);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
+        body { background:var(--bg); color:var(--text); display:flex; min-height:100vh; }
+
+        /* SIDEBAR */
+        .sidebar { width:260px; padding:24px; display:flex; flex-direction:column; border-right:1px solid var(--border); background:linear-gradient(180deg,#0f172a 0%,rgba(30,41,59,0.5) 100%); position:fixed; top:0; left:0; height:100vh; }
+        .brand { display:flex; align-items:center; gap:12px; font-size:22px; font-weight:700; color:var(--primary); margin-bottom:36px; }
+        .nav-items { display:flex; flex-direction:column; gap:6px; flex:1; }
+        .nav-item { display:flex; align-items:center; gap:12px; padding:11px 16px; border-radius:12px; color:var(--muted); text-decoration:none; transition:all 0.2s; font-weight:500; font-size:14px; }
+        .nav-item:hover { color:var(--text); background:rgba(255,255,255,0.05); }
+        .nav-item.active { color:var(--primary); background:var(--primary-glow); border:1px solid rgba(245,158,11,0.1); }
+
+        /* MAIN */
+        .main { margin-left:260px; flex:1; padding:36px 40px; display:flex; flex-direction:column; gap:28px; }
+        .page-title { font-size:26px; font-weight:700; }
+        .page-sub { color:var(--muted); font-size:14px; margin-top:4px; }
+
+        .glass { background:rgba(30,41,59,0.7); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:16px; }
+
+        /* UPLOAD ZONE */
+        .upload-zone { padding:48px; border:2px dashed rgba(245,158,11,0.3); border-radius:20px; text-align:center; cursor:pointer; transition:all 0.3s; background:rgba(245,158,11,0.03); }
+        .upload-zone:hover, .upload-zone.drag-over { border-color:var(--primary); background:var(--primary-glow); }
+        .upload-zone .upload-icon { width:56px; height:56px; background:var(--primary-glow); border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--primary); }
+        .upload-zone h3 { font-size:18px; margin-bottom:8px; }
+        .upload-zone p { color:var(--muted); font-size:14px; }
+        .upload-zone .btn-upload { margin-top:20px; display:inline-flex; align-items:center; gap:8px; padding:10px 24px; background:linear-gradient(135deg,#f59e0b,#ea580c); border:none; border-radius:10px; color:#fff; font-weight:600; cursor:pointer; font-size:14px; transition:all 0.2s; }
+        .upload-zone .btn-upload:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(234,88,12,0.4); }
+        #file-input { display:none; }
+
+        /* PREVIEW TABLE */
+        .preview-box { padding:28px; display:none; }
+        .preview-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+        .nf-info { display:flex; gap:24px; flex-wrap:wrap; }
+        .nf-info-item { display:flex; flex-direction:column; gap:4px; }
+        .nf-info-item label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+        .nf-info-item span { font-size:15px; font-weight:600; }
+        .btn { display:inline-flex; align-items:center; gap:8px; padding:9px 18px; border-radius:10px; border:none; font-weight:600; cursor:pointer; font-size:14px; transition:all 0.2s; }
+        .btn-primary { background:linear-gradient(135deg,#f59e0b,#ea580c); color:#fff; box-shadow:0 4px 15px rgba(234,88,12,0.3); }
+        .btn-primary:hover { transform:translateY(-2px); }
+        .btn-ghost { background:var(--surface2); color:var(--text); }
+        .btn-ghost:hover { background:#475569; }
+
+        table { width:100%; border-collapse:collapse; font-size:14px; }
+        th { text-align:left; padding:10px 12px; color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border); }
+        td { padding:12px; border-bottom:1px solid rgba(255,255,255,0.03); vertical-align:middle; }
+        tr:hover td { background:rgba(255,255,255,0.02); }
+
+        .match-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600; }
+        .match-salvo  { background:rgba(16,185,129,0.1); color:#10b981; }
+        .match-auto   { background:rgba(59,130,246,0.1); color:#3b82f6; }
+        .match-nenhum { background:rgba(239,68,68,0.1); color:#ef4444; }
+
+        select.insumo-select { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:6px 10px; color:var(--text); font-size:13px; width:200px; }
+        select.insumo-select:focus { outline:none; border-color:var(--primary); }
+
+        /* HISTÓRICO */
+        .hist-card { display:flex; justify-content:space-between; align-items:center; padding:16px 20px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:12px; margin-bottom:10px; transition:all 0.2s; }
+        .hist-card:hover { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); }
+        .hist-info { display:flex; flex-direction:column; gap:4px; }
+        .hist-fornecedor { font-weight:600; font-size:15px; }
+        .hist-meta { color:var(--muted); font-size:12px; }
+        .hist-valor { font-size:18px; font-weight:700; color:var(--primary); }
+
+        /* TOAST */
+        .toast { position:fixed; bottom:24px; right:24px; padding:14px 20px; border-radius:12px; font-weight:600; font-size:14px; z-index:999; display:none; animation:slideUp 0.3s ease; }
+        .toast.ok { background:#10b981; color:#fff; }
+        .toast.err { background:#ef4444; color:#fff; }
+        @keyframes slideUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+        .fade-in { animation:fadeIn 0.4s ease forwards; }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="brand"><i data-lucide="flame"></i> Quintal Goiano</div>
+    <nav class="nav-items">
+        <a href="dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+        <a href="rotina.html" class="nav-item"><i data-lucide="calendar-check"></i> Rotina</a>
+        <a href="notas.html" class="nav-item active"><i data-lucide="receipt"></i> Notas Fiscais</a>
+        <a href="fichas.html" class="nav-item"><i data-lucide="chef-hat"></i> Fichas Técnicas</a>
+        <a href="insumos.html" class="nav-item"><i data-lucide="package"></i> Insumos</a>
+        <a href="estoque.html" class="nav-item"><i data-lucide="package-open"></i> Estoque</a>
+        <a href="compras.html" class="nav-item"><i data-lucide="shopping-cart"></i> Lista de Compras</a>
+        <a href="vendas.html" class="nav-item"><i data-lucide="shopping-bag"></i> Vendas</a>
+        <a href="desperdicio.html" class="nav-item"><i data-lucide="trash-2"></i> Desperdício</a>
+        <a href="configuracoes.html" class="nav-item" style="margin-top:auto;"><i data-lucide="settings"></i> Configurações</a>
+    
+        <a href="#" class="nav-item" onclick="logout()" style="margin-top:auto; color: #ef4444;">
+            <i data-lucide="log-out"></i> Sair
+        </a>
+    </nav>
+</aside>
+
+<main class="main">
+    <div class="fade-in">
+        <div class="page-title">Notas Fiscais</div>
+        <div class="page-sub">Importe XML de NF-e para atualizar automaticamente seus insumos e estoque</div>
+    </div>
+
+    <!-- Upload Zone -->
+    <div class="glass fade-in" id="upload-container">
+        <div class="upload-zone" id="drop-zone">
+            <div class="upload-icon"><i data-lucide="file-up" size="28"></i></div>
+            <h3>Arraste o XML da Nota Fiscal aqui</h3>
+            <p>ou clique para selecionar o arquivo</p>
+            <p style="margin-top:8px;font-size:12px;color:#64748b;">Formatos aceitos: .xml (NF-e padrão brasileiro)</p>
+            <button class="btn-upload" onclick="document.getElementById('file-input').click()">
+                <i data-lucide="upload"></i> Selecionar Arquivo XML
+            </button>
+            <input type="file" id="file-input" accept=".xml">
+        </div>
+    </div>
+
+    <!-- Preview da NF -->
+    <div class="glass preview-box fade-in" id="preview-box">
+        <div class="preview-header">
+            <div>
+                <div style="font-size:18px;font-weight:700;margin-bottom:12px;">Prévia da Nota Fiscal</div>
+                <div class="nf-info" id="nf-meta"></div>
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button class="btn btn-ghost" onclick="cancelarPreview()"><i data-lucide="x"></i> Cancelar</button>
+                <button class="btn btn-primary" id="btn-confirmar" onclick="confirmarNFe()"><i data-lucide="check"></i> Confirmar e Salvar</button>
+            </div>
+        </div>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Descrição na NF</th>
+                        <th>Qtd</th>
+                        <th>Un.</th>
+                        <th>R$/Un.</th>
+                        <th>Total</th>
+                        <th>Match</th>
+                        <th>Vincular ao Insumo</th>
+                    </tr>
+                </thead>
+                <tbody id="preview-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Histórico de NFs -->
+    <div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:16px;">Histórico de Importações</div>
+        <div id="historico-container">
+            <div style="color:var(--muted);font-size:14px;">Carregando...</div>
+        </div>
+    </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const API = '/api';
+    lucide.createIcons();
+
+    let dadosNFe = null;
+    let insumosDispo = [];
+
+    // ── DRAG & DROP ──
+    const dropZone = document.getElementById('drop-zone');
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault(); dropZone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) processarArquivo(file);
+    });
+    document.getElementById('file-input').addEventListener('change', e => {
+        if (e.target.files[0]) processarArquivo(e.target.files[0]);
+    });
+
+    async function processarArquivo(file) {
+        if (!file.name.endsWith('.xml')) { toast('Arquivo inválido. Use .xml da NF-e.', 'err'); return; }
+        const btn = document.querySelector('.btn-upload');
+        btn.textContent = 'Processando...';
+
+        const form = new FormData();
+        form.append('arquivo', file);
+
+        try {
+            const res = await fetch(`${API}/nfe/preview`, { method: 'POST', body: form });
+            const data = await res.json();
+            if (!data.ok) { toast(data.erro, 'err'); return; }
+            renderPreview(data);
+        } catch (e) {
+            toast('Erro ao conectar com a API.', 'err');
+        } finally {
+            btn.innerHTML = '<i data-lucide="upload"></i> Selecionar Arquivo XML';
+            lucide.createIcons();
+        }
+    }
+
+    function renderPreview(data) {
+        dadosNFe = data;
+        insumosDispo = data.insumos_disponiveis || [];
+
+        document.getElementById('nf-meta').innerHTML = `
+            <div class="nf-info-item"><label>Fornecedor</label><span>${data.fornecedor}</span></div>
+            <div class="nf-info-item"><label>NF Número</label><span>${data.numero_nf || '—'}</span></div>
+            <div class="nf-info-item"><label>Data</label><span>${data.data_emissao || '—'}</span></div>
+            <div class="nf-info-item"><label>Total</label><span style="color:var(--primary)">R$ ${(data.valor_total||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div>
+            <div class="nf-info-item"><label>Itens</label><span>${data.total_itens}</span></div>
+        `;
+
+        const opcoes = insumosDispo.map(i => `<option value="${i.id}">${i.nome}</option>`).join('');
+
+        const tbody = document.getElementById('preview-body');
+        tbody.innerHTML = data.itens.map((item, idx) => {
+            const matchClass = item.match_tipo === 'mapa_salvo' ? 'match-salvo' :
+                               item.match_tipo === 'automatico'  ? 'match-auto' : 'match-nenhum';
+            const matchLabel = item.match_tipo === 'mapa_salvo' ? 'Salvo' :
+                               item.match_tipo === 'automatico'  ? 'Auto' : 'Sem match';
+
+            const selected = item.insumo_id ? `value="${item.insumo_id}"` : '';
+
+            return `<tr>
+                <td style="max-width:220px;font-size:13px;">${item.descricao_nf}</td>
+                <td>${item.quantidade}</td>
+                <td style="color:var(--muted)">${item.unidade_nf}</td>
+                <td>R$ ${item.valor_unit.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td style="color:var(--primary);font-weight:600;">R$ ${item.valor_total.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td><span class="match-badge ${matchClass}">${matchLabel}</span></td>
+                <td>
+                    <select class="insumo-select" data-idx="${idx}" onchange="vincularInsumo(this)">
+                        <option value="">— ignorar —</option>
+                        ${opcoes}
+                    </select>
+                </td>
+            </tr>`;
+        }).join('');
+
+        // Selecionar opção correta nos selects
+        document.querySelectorAll('.insumo-select').forEach(sel => {
+            const idx = parseInt(sel.dataset.idx);
+            const item = dadosNFe.itens[idx];
+            if (item.insumo_id) sel.value = item.insumo_id;
+        });
+
+        document.getElementById('preview-box').style.display = 'block';
+        lucide.createIcons();
+    }
+
+    function vincularInsumo(sel) {
+        const idx = parseInt(sel.dataset.idx);
+        const insumoId = sel.value ? parseInt(sel.value) : null;
+        dadosNFe.itens[idx].insumo_id = insumoId;
+    }
+
+    function cancelarPreview() {
+        document.getElementById('preview-box').style.display = 'none';
+        dadosNFe = null;
+        document.getElementById('file-input').value = '';
+    }
+
+    async function confirmarNFe() {
+        const btn = document.getElementById('btn-confirmar');
+        btn.textContent = 'Salvando...';
+        try {
+            const res = await fetch(`${API}/nfe/confirmar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosNFe),
+            });
+            const data = await res.json();
+            if (data.ok) {
+                toast('Nota fiscal salva! Estoque e custos atualizados.', 'ok');
+                cancelarPreview();
+                carregarHistorico();
+            } else {
+                toast(data.erro || 'Erro ao salvar.', 'err');
+            }
+        } catch (e) {
+            toast('Erro ao conectar com a API.', 'err');
+        } finally {
+            btn.innerHTML = '<i data-lucide="check"></i> Confirmar e Salvar';
+            lucide.createIcons();
+        }
+    }
+
+    async function carregarHistorico() {
+        const el = document.getElementById('historico-container');
+        try {
+            const rows = await fetch(`${API}/nfe/historico`).then(r => r.json());
+            if (!rows.length) {
+                el.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:16px 0;">Nenhuma nota fiscal importada ainda.</div>';
+                return;
+            }
+            el.innerHTML = rows.map(r => `
+                <div class="hist-card">
+                    <div class="hist-info">
+                        <div class="hist-fornecedor">${r.fornecedor || 'Fornecedor não identificado'}</div>
+                        <div class="hist-meta">NF ${r.numero_nf || '—'} • ${r.data_compra || '—'} • ${r.total_itens} itens • ${r.tipo_nota}</div>
+                    </div>
+                    <div class="hist-valor">R$ ${(r.valor_total||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+                </div>
+            `).join('');
+        } catch (e) {
+            el.innerHTML = '<div style="color:var(--muted);font-size:14px;">API offline — histórico indisponível.</div>';
+        }
+    }
+
+    function toast(msg, tipo) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.className = `toast ${tipo}`;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 3500);
+    }
+
+    carregarHistorico();
+</script>
+
+<script>
+// Guard de autenticação — redireciona para login se sem sessão
+(async function() {
+    try {
+        const res = await fetch('/api/auth/verificar', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.ok) window.location.href = '/login.html';
+    } catch (e) {
+        window.location.href = '/login.html';
+    }
+})();
+
+// Injeta API Key em todas as chamadas fetch automaticamente
+const _fetchOriginal = window.fetch;
+window.fetch = function(url, opts = {}) {
+    const token = sessionStorage.getItem('cmv_token');
+    const apiKey = sessionStorage.getItem('cmv_api_key') || '';
+    if (typeof url === 'string' && url.includes('/api/')) {
+        opts.headers = {
+            ...(opts.headers || {}),
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+        };
+        opts.credentials = 'include';
+    }
+    return _fetchOriginal(url, opts);
+};
+
+async function logout() {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    sessionStorage.clear();
+    window.location.href = '/login.html';
+}
+</script>
+</body>
+</html>

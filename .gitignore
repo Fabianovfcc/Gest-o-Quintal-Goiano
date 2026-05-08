@@ -1,0 +1,51 @@
+# Credenciais e segredos — NUNCA subir para o Git
+.env
+*.env
+.env.*
+!.env.example
+
+# Banco de dados local
+data/cmv.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtualenv
+venv/
+.venv/
+env/
+ENV/
+
+# PDFs gerados
+relatorio_*.pdf
+*.pdf
+
+# Uploads temporários
+uploads/
+tmp/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+gunicorn_error.log
+gunicorn_access.log

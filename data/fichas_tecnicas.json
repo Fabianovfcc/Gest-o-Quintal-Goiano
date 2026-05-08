@@ -1,0 +1,64 @@
+{
+  "restaurante": "Quintal Goiano",
+  "pratos": [
+    {
+      "nome": "Marmita Goiana Simples",
+      "peso_total": "460g-480g",
+      "ingredientes": [
+        { "item": "Arroz agulhinha", "quantidade": "120g" },
+        { "item": "Feijão tropeiro", "quantidade": "80g" },
+        { "item": "Pururuca artesanal", "quantidade": "2 unidades" },
+        { "item": "Mandioca amanteigada", "quantidade": "80g" },
+        { "item": "Vinagrete", "quantidade": "100g" },
+        { "item": "Proteína (Bife/Frango)", "quantidade": "90g", "obs": "Média entre 80g-100g" },
+        { "item": "Marmitex tamanho 4", "quantidade": "1 unidade" }
+      ]
+    },
+    {
+      "nome": "Marmita Goiana Especial",
+      "peso_total": "520g-550g",
+      "ingredientes": [
+        { "item": "Arroz agulhinha", "quantidade": "120g" },
+        { "item": "Feijão tropeiro", "quantidade": "100g" },
+        { "item": "Pururuca artesanal", "quantidade": "3 unidades" },
+        { "item": "Mandioca amanteigada", "quantidade": "100g" },
+        { "item": "Vinagrete", "quantidade": "100g" },
+        { "item": "Proteína (Bife/Frango)", "quantidade": "135g", "obs": "Média entre 120g-150g" },
+        { "item": "Marmitex tamanho 4", "quantidade": "1 unidade" }
+      ]
+    },
+    {
+      "nome": "Strogonoff de Frango",
+      "ingredientes": [
+        { "item": "Filé de frango", "quantidade": "210g" },
+        { "item": "Arroz agulhinha", "quantidade": "130g" },
+        { "item": "Batata frita", "quantidade": "150g" },
+        { "item": "Vinagrete", "quantidade": "120g" },
+        { "item": "Creme de leite", "quantidade": "PENDENTE" },
+        { "item": "Marmitex tamanho 4", "quantidade": "1 unidade" },
+        { "item": "Pote vinagrete", "quantidade": "1 unidade" }
+      ]
+    },
+    {
+      "nome": "Costelinha do Quintal",
+      "ingredientes": [
+        { "item": "Costelinha suína", "quantidade": "250g" },
+        { "item": "Mandioca", "quantidade": "80g" },
+        { "item": "Feijão tropeiro", "quantidade": "100g" },
+        { "item": "Arroz agulhinha", "quantidade": "100g" },
+        { "item": "Marmitex tamanho 1", "quantidade": "1 unidade" }
+      ]
+    },
+    {
+      "nome": "Frango com Pequi",
+      "ingredientes": [
+        { "item": "Coxa de frango", "quantidade": "1 unidade" },
+        { "item": "Sobrecoxa de frango", "quantidade": "1 unidade" },
+        { "item": "Arroz agulhinha", "quantidade": "150g" },
+        { "item": "Angu de milho verde", "quantidade": "150g" },
+        { "item": "Pequi em conserva", "quantidade": "PENDENTE" },
+        { "item": "Marmitex tamanho 4", "quantidade": "1 unidade" }
+      ]
+    }
+  ]
+}

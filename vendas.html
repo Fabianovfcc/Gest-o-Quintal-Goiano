@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendas — CMV Quintal Goiano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #0f172a; --surface: #1e293b; --surface2: #334155;
+            --primary: #f59e0b; --primary-glow: rgba(245,158,11,0.15);
+            --success: #10b981; --danger: #ef4444; --warn: #f59e0b;
+            --text: #f8fafc; --muted: #94a3b8; --border: rgba(255,255,255,0.06);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
+        body { background:var(--bg); color:var(--text); display:flex; min-height:100vh; }
+        .sidebar { width:260px; padding:24px; display:flex; flex-direction:column; border-right:1px solid var(--border); background:linear-gradient(180deg,#0f172a 0%,rgba(30,41,59,0.5) 100%); position:fixed; top:0; left:0; height:100vh; }
+        .brand { display:flex; align-items:center; gap:12px; font-size:22px; font-weight:700; color:var(--primary); margin-bottom:36px; }
+        .nav-items { display:flex; flex-direction:column; gap:6px; flex:1; }
+        .nav-item { display:flex; align-items:center; gap:12px; padding:11px 16px; border-radius:12px; color:var(--muted); text-decoration:none; transition:all 0.2s; font-weight:500; font-size:14px; }
+        .nav-item:hover { color:var(--text); background:rgba(255,255,255,0.05); }
+        .nav-item.active { color:var(--primary); background:var(--primary-glow); border:1px solid rgba(245,158,11,0.1); }
+        .main { margin-left:260px; flex:1; padding:36px 40px; display:flex; flex-direction:column; gap:28px; }
+        .glass { background:rgba(30,41,59,0.7); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:16px; }
+
+        .header-vendas { display:flex; justify-content:space-between; align-items:flex-start; }
+        .btn { display:inline-flex; align-items:center; gap:8px; padding:9px 18px; border-radius:10px; border:none; font-weight:600; cursor:pointer; font-size:14px; transition:all 0.2s; }
+        .btn-primary { background:linear-gradient(135deg,#f59e0b,#ea580c); color:#fff; }
+        .btn-ghost { background:var(--surface2); color:var(--text); }
+
+        .vendas-grid { display:grid; grid-template-columns:1.5fr 1fr; gap:24px; }
+        .section-title { font-size:18px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+        
+        /* Pedidos */
+        .pedidos-list { display:flex; flex-direction:column; gap:12px; }
+        .pedido-card { padding:16px 20px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,0.02); display:flex; justify-content:space-between; align-items:center; transition:all 0.2s; }
+        .pedido-card:hover { border-color:var(--primary-glow); background:rgba(255,255,255,0.04); }
+        .pedido-info { display:flex; flex-direction:column; gap:4px; }
+        .pedido-meta { font-size:12px; color:var(--muted); }
+        .pedido-pratos { font-size:14px; font-weight:500; }
+        .pedido-valor { font-weight:700; color:var(--primary); }
+
+        /* Lançamento Manual */
+        .manual-form { padding:24px; display:flex; flex-direction:column; gap:16px; }
+        .form-group { display:flex; flex-direction:column; gap:6px; }
+        label { font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+        select, input { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:var(--text); font-size:14px; outline:none; }
+        select:focus, input:focus { border-color:var(--primary); }
+
+        .badge { padding:3px 8px; border-radius:6px; font-size:11px; font-weight:700; text-transform:uppercase; }
+        .badge-99 { background:rgba(234,88,12,0.1); color:#ea580c; }
+        .badge-manual { background:rgba(59,130,246,0.1); color:#3b82f6; }
+
+        .toast { position:fixed; bottom:24px; right:24px; padding:14px 20px; border-radius:12px; font-weight:600; font-size:14px; z-index:999; display:none; }
+        .toast.ok { background:#10b981; color:#fff; }
+        .toast.err { background:#ef4444; color:#fff; }
+        
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+        .fade-in { animation:fadeIn 0.4s ease forwards; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand"><i data-lucide="flame"></i> Quintal Goiano</div>
+        <nav class="nav-items">
+            <a href="dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a href="rotina.html" class="nav-item"><i data-lucide="calendar-check"></i> Rotina</a>
+            <a href="notas.html" class="nav-item"><i data-lucide="receipt"></i> Notas Fiscais</a>
+            <a href="fichas.html" class="nav-item"><i data-lucide="chef-hat"></i> Fichas Técnicas</a>
+            <a href="insumos.html" class="nav-item"><i data-lucide="package"></i> Insumos</a>
+            <a href="estoque.html" class="nav-item"><i data-lucide="package-open"></i> Estoque</a>
+            <a href="compras.html" class="nav-item"><i data-lucide="shopping-cart"></i> Lista de Compras</a>
+            <a href="vendas.html" class="nav-item active"><i data-lucide="shopping-bag"></i> Vendas</a>
+            <a href="desperdicio.html" class="nav-item"><i data-lucide="trash-2"></i> Desperdício</a>
+            <a href="configuracoes.html" class="nav-item" style="margin-top:auto;"><i data-lucide="settings"></i> Configurações</a>
+        
+        <a href="#" class="nav-item" onclick="logout()" style="margin-top:auto; color: #ef4444;">
+            <i data-lucide="log-out"></i> Sair
+        </a>
+    </nav>
+    </aside>
+
+    <main class="main">
+        <div class="header-vendas fade-in">
+            <div>
+                <h1 style="font-size:26px;font-weight:700;">Vendas e Delivery</h1>
+                <p style="color:var(--muted);font-size:14px;margin-top:4px;">Pedidos automáticos do 99Food e lançamentos manuais de balcão</p>
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button class="btn btn-ghost" onclick="carregarVendas()"><i data-lucide="refresh-cw"></i> Atualizar</button>
+                <div id="status-polling" style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--success);background:rgba(16,185,129,0.1);padding:4px 12px;border-radius:20px;">
+                    <span style="width:8px;height:8px;background:var(--success);border-radius:50%;display:inline-block;"></span>
+                    Polling 99Food Ativo
+                </div>
+            </div>
+        </div>
+
+        <div class="vendas-grid">
+            <!-- Lista de Pedidos Recentes -->
+            <div class="glass fade-in" style="padding:24px;">
+                <div class="section-title"><i data-lucide="list-ordered"></i> Pedidos Recentes</div>
+                <div id="pedidos-list" class="pedidos-list">
+                    <div style="color:var(--muted);text-align:center;padding:40px;">Carregando pedidos...</div>
+                </div>
+            </div>
+
+            <!-- Lançamento Manual -->
+            <div class="glass manual-form fade-in">
+                <div class="section-title"><i data-lucide="plus-circle"></i> Venda Manual (Balcão)</div>
+                <div class="form-group">
+                    <label>Prato / Item</label>
+                    <select id="manual-prato">
+                        <option value="">Selecione um prato...</option>
+                    </select>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="form-group">
+                        <label>Quantidade</label>
+                        <input type="number" id="manual-qtd" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" id="manual-valor" step="0.01" placeholder="0,00">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="lancarVendaManual()" style="margin-top:12px;justify-content:center;">
+                    <i data-lucide="check"></i> Confirmar Lançamento
+                </button>
+                <p style="font-size:11px;color:var(--muted);text-align:center;">A venda manual abate o estoque conforme a ficha técnica do prato.</p>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API = '/api';
+        lucide.createIcons();
+
+        async function carregarVendas() {
+            try {
+                const res = await fetch(`${API}/vendas/recentes`);
+                const data = await res.json();
+                renderVendas(data);
+            } catch (e) {
+                document.getElementById('pedidos-list').innerHTML = '<div style="color:var(--muted);text-align:center;">API offline.</div>';
+            }
+        }
+
+        function renderVendas(pedidos) {
+            const list = document.getElementById('pedidos-list');
+            if (!pedidos.length) {
+                list.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px;">Nenhum pedido hoje.</div>';
+                return;
+            }
+            list.innerHTML = pedidos.map(p => `
+                <div class="pedido-card">
+                    <div class="pedido-info">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+                            <span class="badge ${p.origem === '99FOOD' ? 'badge-99' : 'badge-manual'}">${p.origem}</span>
+                            <span class="pedido-meta">#${p.id} • ${p.data_venda}</span>
+                        </div>
+                        <div class="pedido-pratos">${p.pratos_resumo || 'Item não identificado'}</div>
+                    </div>
+                    <div class="pedido-valor">R$ ${parseFloat(p.valor_total).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                </div>
+            `).join('');
+        }
+
+        async function carregarPratos() {
+            try {
+                const res = await fetch(`${API}/pratos`);
+                const pratos = await res.json();
+                const sel = document.getElementById('manual-prato');
+                pratos.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.dataset.preco = p.preco_venda;
+                    opt.textContent = p.nome;
+                    sel.appendChild(opt);
+                });
+
+                sel.addEventListener('change', () => {
+                    const selected = sel.options[sel.selectedIndex];
+                    if (selected.dataset.preco) {
+                        document.getElementById('manual-valor').value = selected.dataset.preco;
+                    }
+                });
+            } catch (e) {}
+        }
+
+        async function lancarVendaManual() {
+            const prato_id = document.getElementById('manual-prato').value;
+            const quantidade = parseInt(document.getElementById('manual-qtd').value);
+            const valor_total = parseFloat(document.getElementById('manual-valor').value);
+
+            if (!prato_id || isNaN(quantidade) || isNaN(valor_total)) {
+                toast('Preencha todos os campos.', 'err');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/vendas/lancamento-manual`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prato_id, quantidade, valor_total })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    toast('Venda lançada e estoque abatido!', 'ok');
+                    carregarVendas();
+                    document.getElementById('manual-qtd').value = 1;
+                    document.getElementById('manual-valor').value = '';
+                    document.getElementById('manual-prato').value = '';
+                } else {
+                    toast(data.erro, 'err');
+                }
+            } catch (e) {
+                toast('Erro ao conectar com a API.', 'err');
+            }
+        }
+
+        function toast(msg, tipo) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = `toast ${tipo}`;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        carregarVendas();
+        carregarPratos();
+        setInterval(carregarVendas, 30000); // Auto-refresh a cada 30s
+    </script>
+
+<script>
+// Guard de autenticação — redireciona para login se sem sessão
+(async function() {
+    try {
+        const res = await fetch('/api/auth/verificar', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.ok) window.location.href = '/login.html';
+    } catch (e) {
+        window.location.href = '/login.html';
+    }
+})();
+
+// Injeta API Key em todas as chamadas fetch automaticamente
+const _fetchOriginal = window.fetch;
+window.fetch = function(url, opts = {}) {
+    const token = sessionStorage.getItem('cmv_token');
+    const apiKey = sessionStorage.getItem('cmv_api_key') || '';
+    if (typeof url === 'string' && url.includes('/api/')) {
+        opts.headers = {
+            ...(opts.headers || {}),
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+        };
+        opts.credentials = 'include';
+    }
+    return _fetchOriginal(url, opts);
+};
+
+async function logout() {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    sessionStorage.clear();
+    window.location.href = '/login.html';
+}
+</script>
+</body>
+</html>

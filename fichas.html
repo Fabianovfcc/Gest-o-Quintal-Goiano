@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fichas Técnicas — CMV Quintal Goiano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg:#0f172a; --surface:#1e293b; --surface2:#334155;
+            --primary:#f59e0b; --primary-glow:rgba(245,158,11,0.15);
+            --success:#10b981; --danger:#ef4444;
+            --text:#f8fafc; --muted:#94a3b8; --border:rgba(255,255,255,0.06);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
+        body { background:var(--bg); color:var(--text); display:flex; min-height:100vh; }
+        .sidebar { width:260px; padding:24px; display:flex; flex-direction:column; border-right:1px solid var(--border); background:linear-gradient(180deg,#0f172a 0%,rgba(30,41,59,0.5) 100%); position:fixed; top:0; left:0; height:100vh; }
+        .brand { display:flex; align-items:center; gap:12px; font-size:22px; font-weight:700; color:var(--primary); margin-bottom:36px; }
+        .nav-items { display:flex; flex-direction:column; gap:6px; flex:1; }
+        .nav-item { display:flex; align-items:center; gap:12px; padding:11px 16px; border-radius:12px; color:var(--muted); text-decoration:none; transition:all 0.2s; font-weight:500; font-size:14px; }
+        .nav-item:hover { color:var(--text); background:rgba(255,255,255,0.05); }
+        .nav-item.active { color:var(--primary); background:var(--primary-glow); border:1px solid rgba(245,158,11,0.1); }
+        .main { margin-left:260px; flex:1; padding:36px 40px; display:flex; gap:28px; }
+        .glass { background:rgba(30,41,59,0.7); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:16px; }
+
+        /* COLUNA PRATOS */
+        .col-pratos { width:300px; flex-shrink:0; display:flex; flex-direction:column; gap:0; }
+        .col-pratos-header { padding:20px 24px; border-bottom:1px solid var(--border); }
+        .col-pratos-header h2 { font-size:16px; font-weight:700; margin-bottom:8px; }
+        .search-box { display:flex; align-items:center; gap:8px; background:var(--surface2); border-radius:10px; padding:8px 12px; }
+        .search-box input { background:none; border:none; color:var(--text); font-size:14px; flex:1; outline:none; }
+        .prato-list { overflow-y:auto; max-height:calc(100vh - 200px); }
+        .prato-btn { width:100%; text-align:left; padding:14px 24px; background:none; border:none; color:var(--muted); cursor:pointer; border-bottom:1px solid var(--border); transition:all 0.2s; display:flex; flex-direction:column; gap:4px; }
+        .prato-btn:hover { background:rgba(255,255,255,0.04); color:var(--text); }
+        .prato-btn.active { background:var(--primary-glow); color:var(--primary); border-left:3px solid var(--primary); }
+        .prato-btn .prato-nome { font-size:14px; font-weight:600; }
+        .prato-btn .prato-cat { font-size:11px; opacity:0.6; }
+        .cat-badge { display:inline-block; padding:2px 7px; border-radius:5px; font-size:10px; font-weight:600; background:rgba(245,158,11,0.1); color:var(--primary); }
+
+        /* COLUNA FICHA */
+        .col-ficha { flex:1; min-width:0; display:flex; flex-direction:column; gap:20px; }
+        .ficha-header { padding:24px 28px; display:flex; justify-content:space-between; align-items:center; }
+        .ficha-title { font-size:22px; font-weight:700; }
+        .ficha-sub { color:var(--muted); font-size:14px; margin-top:4px; }
+        .preco-edit { display:flex; align-items:center; gap:10px; }
+        .preco-label { color:var(--muted); font-size:13px; }
+        .preco-input { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 12px; color:var(--text); font-size:18px; font-weight:700; width:120px; outline:none; }
+        .preco-input:focus { border-color:var(--primary); }
+
+        /* CUSTO BOX */
+        .custo-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; padding:0 28px; }
+        .custo-card { padding:16px 20px; border-radius:14px; display:flex; flex-direction:column; gap:6px; }
+        .custo-card label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+        .custo-card span { font-size:22px; font-weight:700; }
+        .cc-custo { background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.1); }
+        .cc-custo span { color:#3b82f6; }
+        .cc-preco { background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.1); }
+        .cc-preco span { color:#10b981; }
+        .cc-cmv { background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.1); }
+        .cc-cmv.danger { background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.1); }
+        .cc-cmv span { color:#f59e0b; }
+        .cc-cmv.danger span { color:#ef4444; }
+
+        /* TABELA INGREDIENTES */
+        .ingredientes-box { padding:0 28px 28px; }
+        .ing-header { display:flex; justify-content:space-between; align-items:center; padding:16px 0; }
+        .ing-title { font-size:15px; font-weight:700; }
+        table { width:100%; border-collapse:collapse; font-size:14px; }
+        th { text-align:left; padding:10px 12px; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border); }
+        td { padding:12px; border-bottom:1px solid rgba(255,255,255,0.03); vertical-align:middle; }
+        tr:last-child td { border-bottom:none; }
+        tr:hover td { background:rgba(255,255,255,0.02); }
+        .status-pendente { color:var(--warn); font-size:12px; display:flex; align-items:center; gap:4px; }
+        .status-ok { color:var(--success); font-size:12px; display:flex; align-items:center; gap:4px; }
+
+        .qty-input { background:var(--surface2); border:1px solid transparent; border-radius:8px; padding:5px 9px; color:var(--text); font-size:14px; width:90px; outline:none; transition:border 0.2s; }
+        .qty-input:focus { border-color:var(--primary); }
+        .btn-save-row { padding:5px 10px; border-radius:7px; border:none; background:rgba(16,185,129,0.1); color:#10b981; cursor:pointer; font-size:12px; font-weight:600; transition:all 0.2s; }
+        .btn-save-row:hover { background:rgba(16,185,129,0.2); }
+        .btn-del-row { padding:5px 8px; border-radius:7px; border:none; background:rgba(239,68,68,0.1); color:#ef4444; cursor:pointer; transition:all 0.2s; }
+        .btn-del-row:hover { background:rgba(239,68,68,0.2); }
+
+        .btn { display:inline-flex; align-items:center; gap:8px; padding:9px 18px; border-radius:10px; border:none; font-weight:600; cursor:pointer; font-size:14px; transition:all 0.2s; }
+        .btn-primary { background:linear-gradient(135deg,#f59e0b,#ea580c); color:#fff; box-shadow:0 4px 15px rgba(234,88,12,0.3); }
+        .btn-primary:hover { transform:translateY(-2px); }
+
+        /* PLACEHOLDER */
+        .placeholder { text-align:center; padding:60px 20px; color:var(--muted); }
+        .placeholder i { display:block; margin:0 auto 16px; }
+
+        .toast { position:fixed; bottom:24px; right:24px; padding:14px 20px; border-radius:12px; font-weight:600; font-size:14px; z-index:999; display:none; }
+        .toast.ok { background:#10b981; color:#fff; }
+        .toast.err { background:#ef4444; color:#fff; }
+
+
+        .btn-dup { position:absolute;right:10px;top:50%;transform:translateY(-50%);
+            padding:3px 7px;border-radius:6px;color:var(--muted);font-size:16px;
+            opacity:0;transition:opacity 0.2s;cursor:pointer;background:none;border:none; }
+        .prato-btn:hover .btn-dup { opacity:1; }
+        .btn-dup:hover { background:rgba(255,255,255,0.08);color:var(--text); }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+        .fade-in { animation:fadeIn 0.3s ease; }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="brand"><i data-lucide="flame"></i> Quintal Goiano</div>
+    <nav class="nav-items">
+        <a href="dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+        <a href="rotina.html" class="nav-item"><i data-lucide="calendar-check"></i> Rotina</a>
+        <a href="notas.html" class="nav-item"><i data-lucide="receipt"></i> Notas Fiscais</a>
+        <a href="fichas.html" class="nav-item active"><i data-lucide="chef-hat"></i> Fichas Técnicas</a>
+        <a href="insumos.html" class="nav-item"><i data-lucide="package"></i> Insumos</a>
+        <a href="estoque.html" class="nav-item"><i data-lucide="package-open"></i> Estoque</a>
+        <a href="compras.html" class="nav-item"><i data-lucide="shopping-cart"></i> Lista de Compras</a>
+        <a href="vendas.html" class="nav-item"><i data-lucide="shopping-bag"></i> Vendas</a>
+        <a href="desperdicio.html" class="nav-item"><i data-lucide="trash-2"></i> Desperdício</a>
+        <a href="configuracoes.html" class="nav-item" style="margin-top:auto;"><i data-lucide="settings"></i> Configurações</a>
+    
+        <a href="#" class="nav-item" onclick="logout()" style="margin-top:auto; color: #ef4444;">
+            <i data-lucide="log-out"></i> Sair
+        </a>
+    </nav>
+</aside>
+
+<main class="main">
+    <!-- Lista de Pratos -->
+    <div class="glass col-pratos">
+        <div class="col-pratos-header">
+            <h2>Cardápio</h2><button onclick="abrirModalNovoPrato()" style="width:100%;margin-top:8px;padding:7px;border-radius:8px;border:none;background:linear-gradient(135deg,#f59e0b,#ea580c);color:#fff;cursor:pointer;font-weight:600;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px;"><i data-lucide='plus' size='14'></i> Novo Prato</button>
+            <div class="search-box">
+                <i data-lucide="search" size="14" style="color:var(--muted)"></i>
+                <input type="text" id="search-prato" placeholder="Buscar prato..." oninput="filtrarPratos()">
+            </div>
+        </div>
+        <div class="prato-list" id="prato-list">
+            <div style="padding:20px;color:var(--muted);font-size:14px;">Carregando...</div>
+        </div>
+    </div>
+
+    <!-- Ficha Técnica do Prato Selecionado -->
+    <div class="col-ficha">
+        <div id="ficha-placeholder" class="glass placeholder">
+            <i data-lucide="chef-hat" size="48" style="color:var(--muted)"></i>
+            <div style="font-size:18px;font-weight:600;margin-bottom:8px;">Selecione um Prato</div>
+            <div>Escolha um prato na lista à esquerda para ver e editar sua ficha técnica</div>
+        </div>
+
+        <div id="ficha-content" style="display:none;" class="fade-in">
+            <!-- Header -->
+            <div class="glass ficha-header">
+                <div>
+                    <div class="ficha-title" id="ficha-nome">—</div>
+                    <div class="ficha-sub" id="ficha-cat">—</div>
+                </div>
+                <div class="preco-edit">
+                    <span class="preco-label">Preço de Venda:</span>
+                    <span style="color:var(--muted);font-size:18px;">R$</span>
+                    <input class="preco-input" type="number" id="preco-input" step="0.01" min="0" placeholder="0,00">
+                    <button class="btn btn-primary" onclick="salvarPreco()"><i data-lucide="save"></i></button>
+                </div>
+            </div>
+
+            <!-- Custos -->
+            <div class="custo-row">
+                <div class="custo-card cc-custo glass">
+                    <label>Custo Total do Prato</label>
+                    <span id="custo-total">—</span>
+                </div>
+                <div class="custo-card cc-preco glass">
+                    <label>Preço de Venda</label>
+                    <span id="preco-display">—</span>
+                </div>
+                <div class="custo-card cc-cmv glass" id="cmv-card">
+                    <label>CMV %</label>
+                    <span id="cmv-pct">—</span>
+                </div>
+            </div>
+
+            <!-- Ingredientes -->
+            <div class="glass ingredientes-box">
+                <div class="ing-header">
+                    <div class="ing-title">Ingredientes da Ficha Técnica</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Insumo</th>
+                            <th>Quantidade</th>
+                            <th>Unid.</th>
+                            <th>Custo/Un.</th>
+                            <th>Custo Item</th>
+                            <th>Obs.</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="ficha-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const API = '/api';
+    lucide.createIcons();
+
+    let pratos = [];
+    let pratoAtual = null;
+
+    async function carregarPratos() {
+        try {
+            pratos = await fetch(`${API}/pratos`).then(r => r.json());
+            renderPratos(pratos);
+        } catch (e) {
+            document.getElementById('prato-list').innerHTML =
+                '<div style="padding:16px;color:var(--muted);font-size:13px;">API offline.</div>';
+        }
+    }
+
+    function renderPratos(lista) {
+        const el = document.getElementById('prato-list');
+        if (!lista.length) {
+            el.innerHTML = '<div style="padding:16px;color:var(--muted);font-size:13px;">Nenhum prato encontrado.</div>';
+            return;
+        }
+        el.innerHTML = lista.map(p => `
+            <button class="prato-btn ${pratoAtual?.id === p.id ? 'active' : ''}"
+                    style="position:relative" onclick="selecionarPrato(${p.id})">
+                <div class="prato-nome">${p.nome}</div>
+                <div class="prato-cat">${p.categoria} · ${p.total_ingredientes||0} ing.
+                    ${p.ingredientes_pendentes > 0 ? '<span style="color:#ef4444;"> pendentes</span>' : ''}
+                </div>
+                <span class="btn-dup" onclick="duplicarPrato(event,${p.id})" title="Duplicar">&#x29C9;</span>
+            </button>
+        `).join('');
+    }
+
+    function filtrarPratos() {
+        const q = document.getElementById('search-prato').value.toLowerCase();
+        renderPratos(pratos.filter(p => p.nome.toLowerCase().includes(q)));
+    }
+
+    async function selecionarPrato(id) {
+        document.querySelectorAll('.prato-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`[onclick="selecionarPrato(${id})"]`)?.classList.add('active');
+
+        try {
+            const data = await fetch(`${API}/pratos/${id}/ficha`).then(r => r.json());
+            pratoAtual = data.prato;
+            renderFicha(data);
+        } catch (e) {
+            toast('Erro ao carregar ficha técnica.', 'err');
+        }
+    }
+
+    function renderFicha(data) {
+        const p = data.prato;
+        document.getElementById('ficha-placeholder').style.display = 'none';
+        const content = document.getElementById('ficha-content');
+        content.style.display = 'flex';
+        content.style.flexDirection = 'column';
+        content.style.gap = '20px';
+
+        document.getElementById('ficha-nome').textContent = p.nome;
+        document.getElementById('ficha-cat').textContent = p.categoria;
+        document.getElementById('preco-input').value = p.preco_venda || '';
+
+        const fmtR = v => v != null ? `R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2})}` : '—';
+        document.getElementById('custo-total').textContent = fmtR(data.custo_total);
+        document.getElementById('preco-display').textContent = fmtR(p.preco_venda > 0 ? p.preco_venda : null);
+        document.getElementById('cmv-pct').textContent = data.cmv_pct ? data.cmv_pct + '%' : '—';
+
+        const card = document.getElementById('cmv-card');
+        if (data.cmv_pct > 40) card.classList.add('danger'); else card.classList.remove('danger');
+
+        // Tabela
+        const tbody = document.getElementById('ficha-body');
+        const fmtR2 = v => v != null ? `R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2})}` : '—';
+        tbody.innerHTML = (data.ingredientes || []).map(ing => {
+            const custoPorUnit = ing.custo_compra > 0 ? fmtR2(ing.custo_compra)+'/'+ing.unidade : '—';
+            const custoItem = ing.custo_item != null ? `R$ ${ing.custo_item.toLocaleString('pt-BR',{minimumFractionDigits:4})}` : '—';
+            const st = ing.status_cadastro === 'PENDENTE'
+                ? `<span class="status-pendente"><i data-lucide="alert-circle" size="12"></i> Pendente</span>`
+                : `<span class="status-ok"><i data-lucide="check-circle" size="12"></i> OK</span>`;
+            return `<tr data-id="${ing.id||''}">
+                <td style="font-weight:500">${ing.insumo}</td>
+                <td><input class="qty-input inp-qtd" type="number" value="${ing.quantidade}" step="0.1" min="0"></td>
+                <td style="color:var(--muted)">${ing.unidade}</td>
+                <td style="color:var(--muted)">${custoPorUnit}</td>
+                <td style="color:var(--primary);font-weight:600">${custoItem}</td>
+                <td><input class="qty-input inp-obs" type="text" value="${ing.observacao||''}" placeholder="obs..." style="width:110px"></td>
+                <td>${st}</td>
+                <td style="display:flex;gap:6px;">
+                    <button class="btn-save-row" onclick="salvarItemFicha(this)">Salvar</button>
+                    <button class="btn-del-row" onclick="deletarItemFicha(this)"><i data-lucide="trash-2" size="12"></i></button>
+                </td>
+            </tr>`;
+        }).join('') + `<tr style="background:rgba(245,158,11,0.04);border-top:1px dashed rgba(245,158,11,0.2);">
+            <td colspan="8"><div style="display:flex;gap:8px;align-items:center;padding:6px 0;">
+                <select id="sel-insumo" class="qty-input" style="width:200px" onfocus="carregarInsumoSelect()"><option value="">Buscar insumo...</option></select>
+                <input id="qtd-novo" type="number" class="qty-input" placeholder="Qtd" step="0.1" style="width:75px">
+                <input id="obs-novo" type="text" class="qty-input" placeholder="Observacao" style="width:120px">
+                <button class="btn-save-row" onclick="adicionarIngrediente()" style="white-space:nowrap">+ Adicionar</button>
+            </div></td>
+        </tr>`;
+
+        lucide.createIcons();
+    }
+
+    function marcarAlterado(input) {
+        input.style.borderColor = 'var(--primary)';
+    }
+
+    async function salvarItemFicha(btn) {
+        const row = btn.closest('tr');
+        const fichaId = row.dataset.id;
+        if (!fichaId || !pratoAtual) return;
+        const qtd = parseFloat(row.querySelector('.inp-qtd').value);
+        const obs = row.querySelector('.inp-obs')?.value || '';
+
+        try {
+            const res = await fetch(`${API}/pratos/${pratoAtual.id}/ficha/${fichaId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ quantidade: qtd, observacao: obs }),
+            });
+            const data = await res.json();
+            if (data.ok) { toast('Quantidade atualizada!', 'ok'); selecionarPrato(pratoAtual.id); }
+            else toast(data.erro, 'err');
+        } catch (e) { toast('Erro ao salvar.', 'err'); }
+    }
+
+    async function deletarItemFicha(btn) {
+        const row = btn.closest('tr');
+        const fichaId = row.dataset.id;
+        if (!fichaId || !confirm('Remover este ingrediente da ficha?')) return;
+
+        try {
+            const res = await fetch(`${API}/fichas/${fichaId}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.ok) { toast('Ingrediente removido.', 'ok'); selecionarPrato(pratoAtual.id); }
+            else toast(data.erro, 'err');
+        } catch (e) { toast('Erro ao remover.', 'err'); }
+    }
+
+    async function salvarPreco() {
+        if (!pratoAtual) return;
+        const preco = parseFloat(document.getElementById('preco-input').value);
+        if (isNaN(preco) || preco < 0) { toast('Preço inválido.', 'err'); return; }
+
+        try {
+            const res = await fetch(`${API}/pratos/${pratoAtual.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ preco_venda: preco }),
+            });
+            const data = await res.json();
+            if (data.ok) { toast('Preço atualizado!', 'ok'); selecionarPrato(pratoAtual.id); }
+            else toast(data.erro, 'err');
+        } catch (e) { toast('Erro ao salvar preço.', 'err'); }
+    }
+
+    function toast(msg, tipo) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.className = `toast ${tipo}`;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 3000);
+    }
+
+
+    // Modal novo prato
+    function abrirModalNovoPrato() { document.getElementById('modal-np').style.display='flex'; }
+    function fecharModalNovoPrato() { document.getElementById('modal-np').style.display='none'; }
+    async function salvarNovoPrato() {
+        const nome = document.getElementById('np-nome').value.trim();
+        if (!nome) { toast('Nome obrigatorio.','err'); return; }
+        const res = await fetch(API+'/pratos',{method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({nome,categoria:document.getElementById('np-cat').value,
+            descricao:document.getElementById('np-desc').value,
+            preco_venda:parseFloat(document.getElementById('np-preco').value)||0})});
+        const d = await res.json();
+        if(d.ok){fecharModalNovoPrato();await carregarPratos();selecionarPrato(d.prato.id);toast('Prato criado!','ok');}
+        else toast(d.erro,'err');
+    }
+    // Duplicar prato
+    async function duplicarPrato(e,id) {
+        e.stopPropagation();
+        if(!confirm('Duplicar prato com toda a ficha tecnica?')) return;
+        const res = await fetch(API+'/pratos/'+id+'/duplicar',{method:'POST'});
+        const d = await res.json();
+        if(d.ok){await carregarPratos();selecionarPrato(d.prato.id);toast('Prato duplicado!','ok');}
+        else toast(d.erro,'err');
+    }
+    // Adicionar ingrediente
+    let todosInsumos = [];
+    async function carregarInsumoSelect() {
+        if(todosInsumos.length) return;
+        todosInsumos = await fetch(API+'/insumos').then(r=>r.json());
+        const sel = document.getElementById('sel-insumo');
+        sel.innerHTML = '<option value="">Selecione...</option>' +
+            todosInsumos.map(i=>`<option value="${i.id}">${i.nome} (${i.unidade})</option>`).join('');
+    }
+    async function adicionarIngrediente() {
+        if(!pratoAtual) return;
+        const insumo_id = document.getElementById('sel-insumo').value;
+        const quantidade = parseFloat(document.getElementById('qtd-novo').value);
+        const observacao = document.getElementById('obs-novo').value;
+        if(!insumo_id||isNaN(quantidade)){toast('Preencha insumo e quantidade.','err');return;}
+        const res = await fetch(API+'/pratos/'+pratoAtual.id+'/ficha',{method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({insumo_id,quantidade,observacao})});
+        const d = await res.json();
+        if(d.ok){document.getElementById('qtd-novo').value='';document.getElementById('obs-novo').value='';
+            selecionarPrato(pratoAtual.id);toast('Ingrediente adicionado!','ok');}
+        else toast(d.erro,'err');
+    }
+    carregarPratos();
+</script>
+
+<!-- MODAL NOVO PRATO -->
+<div id="modal-np" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;">
+  <div style="background:#1e293b;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px;width:420px;display:flex;flex-direction:column;gap:16px;">
+    <div style="font-size:18px;font-weight:700;">Novo Prato</div>
+    <div><div style="font-size:11px;color:#94a3b8;margin-bottom:4px;">Nome *</div>
+    <input id="np-nome" type="text" placeholder="Nome do prato" style="width:100%;background:#334155;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:9px 12px;color:#f8fafc;font-size:14px;outline:none;"></div>
+    <div><div style="font-size:11px;color:#94a3b8;margin-bottom:4px;">Categoria</div>
+    <select id="np-cat" style="width:100%;background:#334155;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:9px 12px;color:#f8fafc;font-size:14px;outline:none;">
+    <option>Marmita</option><option>Prato Principal</option><option>Petisco</option><option>Acompanhamento</option><option>Bebida</option></select></div>
+    <div><div style="font-size:11px;color:#94a3b8;margin-bottom:4px;">Descricao</div>
+    <textarea id="np-desc" rows="2" placeholder="Descricao opcional" style="width:100%;background:#334155;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:9px 12px;color:#f8fafc;font-size:14px;outline:none;resize:none;"></textarea></div>
+    <div><div style="font-size:11px;color:#94a3b8;margin-bottom:4px;">Preco de Venda (R$)</div>
+    <input id="np-preco" type="number" step="0.01" min="0" placeholder="0,00" style="width:100%;background:#334155;border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:9px 12px;color:#f8fafc;font-size:14px;outline:none;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+    <button onclick="fecharModalNovoPrato()" style="padding:9px 18px;border-radius:10px;border:none;background:#334155;color:#f8fafc;cursor:pointer;font-weight:600;">Cancelar</button>
+    <button onclick="salvarNovoPrato()" style="padding:9px 18px;border-radius:10px;border:none;background:linear-gradient(135deg,#f59e0b,#ea580c);color:#fff;cursor:pointer;font-weight:600;">Criar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Guard de autenticação — redireciona para login se sem sessão
+(async function() {
+    try {
+        const res = await fetch('/api/auth/verificar', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.ok) window.location.href = '/login.html';
+    } catch (e) {
+        window.location.href = '/login.html';
+    }
+})();
+
+// Injeta API Key em todas as chamadas fetch automaticamente
+const _fetchOriginal = window.fetch;
+window.fetch = function(url, opts = {}) {
+    const token = sessionStorage.getItem('cmv_token');
+    const apiKey = sessionStorage.getItem('cmv_api_key') || '';
+    if (typeof url === 'string' && url.includes('/api/')) {
+        opts.headers = {
+            ...(opts.headers || {}),
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+        };
+        opts.credentials = 'include';
+    }
+    return _fetchOriginal(url, opts);
+};
+
+async function logout() {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    sessionStorage.clear();
+    window.location.href = '/login.html';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{
+  "periodo": "27/04/2026 a 30/04/2026",
+  "vendas": [
+    {
+      "data": "2026-04-27",
+      "dia": "Domingo",
+      "pedidos": 22,
+      "faturamento_bruto": 519.14,
+      "comissao": 53.89,
+      "receita_total_plataforma": 719.00
+    },
+    {
+      "data": "2026-04-28",
+      "dia": "Segunda",
+      "pedidos": 27,
+      "faturamento_bruto": 647.50,
+      "comissao": 68.55,
+      "receita_total_plataforma": 1023.00
+    },
+    {
+      "data": "2026-04-29",
+      "dia": "Terça",
+      "pedidos": 37,
+      "faturamento_bruto": 817.20,
+      "comissao": 86.74,
+      "receita_total_plataforma": 1239.00
+    },
+    {
+      "data": "2026-04-30",
+      "dia": "Quarta",
+      "pedidos": 40,
+      "faturamento_bruto": 899.40,
+      "comissao": 93.83,
+      "receita_total_plataforma": 1422.00
+    }
+  ],
+  "totais": {
+    "pedidos": 126,
+    "bruto": 2883.24,
+    "comissao": 303.01,
+    "receita_plataforma": 4403.00
+  }
+}

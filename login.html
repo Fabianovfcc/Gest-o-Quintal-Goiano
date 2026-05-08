@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — CMV Quintal Goiano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0f172a; --surface: #1e293b; --primary: #f59e0b;
+            --text: #f8fafc; --muted: #94a3b8; --danger: #ef4444;
+            --border: rgba(255,255,255,0.06);
+        }
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 20px; padding: 48px 40px; width: 100%;
+            max-width: 400px; box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+        }
+        .logo { text-align: center; margin-bottom: 32px; }
+        .logo h1 { font-size: 22px; font-weight: 700; color: var(--primary); }
+        .logo p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+        label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+        input[type=password] {
+            width: 100%; background: #0f172a; border: 1px solid var(--border);
+            border-radius: 10px; padding: 12px 16px; color: var(--text);
+            font-family: 'Outfit', sans-serif; font-size: 15px;
+            outline: none; transition: border 0.2s;
+        }
+        input[type=password]:focus { border-color: var(--primary); }
+        button {
+            width: 100%; margin-top: 24px; padding: 14px;
+            background: var(--primary); color: #0f172a;
+            border: none; border-radius: 10px; font-size: 15px;
+            font-weight: 700; font-family: 'Outfit', sans-serif;
+            cursor: pointer; transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        .erro { color: var(--danger); font-size: 13px; margin-top: 12px; text-align: center; display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">
+            <h1>🌿 CMV Quintal Goiano</h1>
+            <p>Sistema de Controle de Custo</p>
+        </div>
+        <label>Senha de acesso</label>
+        <input type="password" id="senha" placeholder="••••••••••••" autofocus
+               onkeydown="if(event.key==='Enter') entrar()">
+        <button onclick="entrar()">Entrar</button>
+        <p class="erro" id="erro">Senha incorreta. Tente novamente.</p>
+    </div>
+    <script>
+        const API = window.location.origin;
+
+        fetch(`${API}/api/auth/verificar`, {credentials:'include'})
+            .then(r => r.json())
+            .then(d => { if (d.ok) window.location.href = '/dashboard.html'; })
+            .catch(() => {});
+
+        async function entrar() {
+            const senha = document.getElementById('senha').value;
+            const erro  = document.getElementById('erro');
+            if (!senha) return;
+            erro.style.display = 'none';
+            try {
+                const res = await fetch(`${API}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({senha}),
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    if (data.token) sessionStorage.setItem('cmv_token', data.token);
+                    window.location.href = '/dashboard.html';
+                } else {
+                    erro.style.display = 'block';
+                }
+            } catch (e) {
+                erro.textContent = 'Erro ao conectar.';
+                erro.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

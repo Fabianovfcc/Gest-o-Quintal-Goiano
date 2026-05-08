@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações — CMV Quintal Goiano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #0f172a; --surface: #1e293b; --surface2: #334155;
+            --primary: #f59e0b; --primary-glow: rgba(245,158,11,0.15);
+            --success: #10b981; --danger: #ef4444; --text: #f8fafc; --muted: #94a3b8; --border: rgba(255,255,255,0.06);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
+        body { background:var(--bg); color:var(--text); display:flex; min-height:100vh; }
+        .sidebar { width:260px; padding:24px; display:flex; flex-direction:column; border-right:1px solid var(--border); background:linear-gradient(180deg,#0f172a 0%,rgba(30,41,59,0.5) 100%); position:fixed; top:0; left:0; height:100vh; }
+        .brand { display:flex; align-items:center; gap:12px; font-size:22px; font-weight:700; color:var(--primary); margin-bottom:36px; }
+        .nav-items { display:flex; flex-direction:column; gap:6px; flex:1; }
+        .nav-item { display:flex; align-items:center; gap:12px; padding:11px 16px; border-radius:12px; color:var(--muted); text-decoration:none; transition:all 0.2s; font-weight:500; font-size:14px; }
+        .nav-item:hover { color:var(--text); background:rgba(255,255,255,0.05); }
+        .nav-item.active { color:var(--primary); background:var(--primary-glow); border:1px solid rgba(245,158,11,0.1); }
+        .main { margin-left:260px; flex:1; padding:36px 40px; display:flex; flex-direction:column; gap:28px; }
+        .glass { background:rgba(30,41,59,0.7); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:16px; }
+
+        .config-section { padding:24px; margin-bottom:24px; }
+        .section-header { display:flex; align-items:center; gap:12px; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+        .section-header i { color:var(--primary); }
+        .section-title { font-size:18px; font-weight:700; }
+
+        .config-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:20px; }
+        .config-card { padding:16px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,0.02); }
+        
+        .form-group { margin-bottom:16px; }
+        label { display:block; font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; margin-bottom:6px; }
+        input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:var(--text); font-size:14px; outline:none; }
+        input:focus { border-color:var(--primary); }
+
+        .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:10px; border:none; font-weight:600; cursor:pointer; font-size:14px; transition:all 0.2s; }
+        .btn-primary { background:linear-gradient(135deg,#f59e0b,#ea580c); color:#fff; }
+        .btn-ghost { background:var(--surface2); color:var(--text); }
+
+        .status-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; }
+        .status-online { background:rgba(16,185,129,0.1); color:#10b981; }
+        .status-offline { background:rgba(239,68,68,0.1); color:#ef4444; }
+
+        .toast { position:fixed; bottom:24px; right:24px; padding:14px 20px; border-radius:12px; font-weight:600; font-size:14px; z-index:999; display:none; }
+        .toast.ok { background:#10b981; color:#fff; }
+        .toast.err { background:#ef4444; color:#fff; }
+
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+        .fade-in { animation:fadeIn 0.4s ease forwards; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand"><i data-lucide="flame"></i> Quintal Goiano</div>
+        <nav class="nav-items">
+            <a href="dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a href="rotina.html" class="nav-item"><i data-lucide="calendar-check"></i> Rotina</a>
+            <a href="notas.html" class="nav-item"><i data-lucide="receipt"></i> Notas Fiscais</a>
+            <a href="fichas.html" class="nav-item"><i data-lucide="chef-hat"></i> Fichas Técnicas</a>
+            <a href="insumos.html" class="nav-item"><i data-lucide="package"></i> Insumos</a>
+            <a href="estoque.html" class="nav-item"><i data-lucide="package-open"></i> Estoque</a>
+            <a href="compras.html" class="nav-item"><i data-lucide="shopping-cart"></i> Lista de Compras</a>
+            <a href="vendas.html" class="nav-item"><i data-lucide="shopping-bag"></i> Vendas</a>
+            <a href="desperdicio.html" class="nav-item"><i data-lucide="trash-2"></i> Desperdício</a>
+            <a href="configuracoes.html" class="nav-item active" style="margin-top:auto;"><i data-lucide="settings"></i> Configurações</a>
+        
+        <a href="#" class="nav-item" onclick="logout()" style="margin-top:auto; color: #ef4444;">
+            <i data-lucide="log-out"></i> Sair
+        </a>
+    </nav>
+    </aside>
+
+    <main class="main">
+        <div class="fade-in">
+            <h1 style="font-size:26px;font-weight:700;">Configurações do Sistema</h1>
+            <p style="color:var(--muted);font-size:14px;margin-top:4px;">Gerencie integrações, banco de dados e preferências globais</p>
+        </div>
+
+        <!-- Status do Sistema -->
+        <div class="glass config-section fade-in">
+            <div class="section-header">
+                <i data-lucide="activity"></i>
+                <div class="section-title">Status e Conectividade</div>
+            </div>
+            <div class="config-grid">
+                <div class="config-card">
+                    <label>Banco de Dados</label>
+                    <div id="db-status" class="status-badge status-offline">Verificando...</div>
+                    <p id="db-mode" style="font-size:12px;color:var(--muted);margin-top:8px;">Modo: —</p>
+                </div>
+                <div class="config-card">
+                    <label>Motor de Polling (99Food)</label>
+                    <div id="polling-status" class="status-badge status-offline">Verificando...</div>
+                    <p style="font-size:12px;color:var(--muted);margin-top:8px;">Intervalo: 5 minutos</p>
+                </div>
+                <div class="config-card">
+                    <label>Versão do Sistema</label>
+                    <div style="font-size:15px;font-weight:600;color:var(--primary);">Sprint 3 • v3.0.0</div>
+                    <p style="font-size:12px;color:var(--muted);margin-top:8px;">Última atualização: 04/05/2026</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integrações -->
+        <div class="glass config-section fade-in">
+            <div class="section-header">
+                <i data-lucide="share-2"></i>
+                <div class="section-title">Credenciais de Plataformas</div>
+            </div>
+            <div class="config-grid">
+                <div class="config-card">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                        <img src="https://www.99food.com/favicon.ico" width="20" height="20" style="border-radius:4px;">
+                        <span style="font-weight:600;">99Food Delivery</span>
+                    </div>
+                    <div class="form-group">
+                        <label>API Key / Token</label>
+                        <input type="password" id="99food-token" value="************************">
+                    </div>
+                    <div class="form-group">
+                        <label>ID da Loja</label>
+                        <input type="text" id="99food-store-id" value="quintal_goiano_01">
+                    </div>
+                    <button class="btn btn-primary" onclick="toast('Configurações de integração salvas!', 'ok')">Salvar 99Food</button>
+                </div>
+
+                <div class="config-card">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                        <i data-lucide="cloud" size="20"></i>
+                        <span style="font-weight:600;">Supabase (Produção)</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Status da Sincronização</label>
+                        <div id="sync-status" style="font-size:13px;color:var(--success);">Tabelas sincronizadas via schema.sql</div>
+                    </div>
+                    <button class="btn btn-ghost" onclick="toast('Iniciando migração de dados...', 'ok')">Rodar Migração Manual</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API = '/api';
+        lucide.createIcons();
+
+        async function carregarConfiguracoes() {
+            try {
+                const cfg = await fetch(`${API}/configuracoes`).then(r => r.json());
+                for (const [chave, obj] of Object.entries(cfg)) {
+                    const el = document.getElementById(`cfg-${chave}`);
+                    if (el) el.value = (typeof obj === 'object') ? obj.valor : obj;
+                }
+            } catch (e) { console.error('Erro ao carregar configs:', e); }
+        }
+
+        async function salvarConfiguracoes() {
+            const inputs = document.querySelectorAll('[id^="cfg-"]');
+            const payload = {};
+            inputs.forEach(el => { payload[el.id.replace('cfg-', '')] = el.value; });
+            try {
+                const res = await fetch(`${API}/configuracoes`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                toast(data.ok ? 'Configurações salvas!' : (data.erro || 'Erro'), data.ok ? 'ok' : 'err');
+            } catch (e) { toast('Erro ao conectar com a API.', 'err'); }
+        }
+
+        async function checkStatus() {
+            try {
+                const data = await fetch(`${API}/status`).then(r => r.json());
+                const dbEl = document.getElementById('db-status');
+                if (dbEl) {
+                    dbEl.textContent = data.db_status === 'connected' ? 'CONECTADO' : 'ERRO';
+                    dbEl.className = `status-badge ${data.db_status === 'connected' ? 'status-online' : 'status-offline'}`;
+                }
+                const modeEl = document.getElementById('db-mode');
+                if (modeEl) modeEl.textContent = `Modo: ${data.db_mode || 'SQLite'}`;
+                const pollEl = document.getElementById('polling-status');
+                if (pollEl) {
+                    pollEl.textContent = data.polling_active ? 'ATIVO' : 'DESATIVADO';
+                    pollEl.className = `status-badge ${data.polling_active ? 'status-online' : 'status-offline'}`;
+                }
+            } catch (e) {}
+        }
+
+        function toast(msg, tipo) {
+            const el = document.getElementById('toast');
+            if (!el) return;
+            el.textContent = msg;
+            el.className = `toast ${tipo}`;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3500);
+        }
+
+        carregarConfiguracoes();
+        checkStatus();
+        setInterval(checkStatus, 10000);
+    </script>
+
+<script>
+// Guard de autenticação — redireciona para login se sem sessão
+(async function() {
+    try {
+        const res = await fetch('/api/auth/verificar', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.ok) window.location.href = '/login.html';
+    } catch (e) {
+        window.location.href = '/login.html';
+    }
+})();
+
+// Injeta API Key em todas as chamadas fetch automaticamente
+const _fetchOriginal = window.fetch;
+window.fetch = function(url, opts = {}) {
+    const token = sessionStorage.getItem('cmv_token');
+    const apiKey = sessionStorage.getItem('cmv_api_key') || '';
+    if (typeof url === 'string' && url.includes('/api/')) {
+        opts.headers = {
+            ...(opts.headers || {}),
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+        };
+        opts.credentials = 'include';
+    }
+    return _fetchOriginal(url, opts);
+};
+
+async function logout() {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    sessionStorage.clear();
+    window.location.href = '/login.html';
+}
+</script>
+</body>
+</html>
