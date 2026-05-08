@@ -56,6 +56,40 @@
             .badge { border: 1px solid #000; color: #000 !important; background: none !important; }
         }
     </style>
+<script>
+// Guard de autenticação — redireciona para login se sem sessão
+(async function() {
+    try {
+        const res = await fetch('/api/auth/verificar', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.ok) window.location.href = '/login.html';
+    } catch (e) {
+        window.location.href = '/login.html';
+    }
+})();
+
+// Injeta API Key em todas as chamadas fetch automaticamente
+const _fetchOriginal = window.fetch;
+window.fetch = function(url, opts = {}) {
+    const token = sessionStorage.getItem('cmv_token');
+    const apiKey = sessionStorage.getItem('cmv_api_key') || '';
+    if (typeof url === 'string' && url.includes('/api/')) {
+        opts.headers = {
+            ...(opts.headers || {}),
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+        };
+        opts.credentials = 'include';
+    }
+    return _fetchOriginal(url, opts);
+};
+
+async function logout() {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    sessionStorage.clear();
+    window.location.href = '/login.html';
+}
+</script>
 </head>
 <body>
     <aside class="sidebar">
@@ -276,39 +310,6 @@
         };
     </script>
 
-<script>
-// Guard de autenticação — redireciona para login se sem sessão
-(async function() {
-    try {
-        const res = await fetch('/api/auth/verificar', { credentials: 'include' });
-        const data = await res.json();
-        if (!data.ok) window.location.href = '/login.html';
-    } catch (e) {
-        window.location.href = '/login.html';
-    }
-})();
 
-// Injeta API Key em todas as chamadas fetch automaticamente
-const _fetchOriginal = window.fetch;
-window.fetch = function(url, opts = {}) {
-    const token = sessionStorage.getItem('cmv_token');
-    const apiKey = sessionStorage.getItem('cmv_api_key') || '';
-    if (typeof url === 'string' && url.includes('/api/')) {
-        opts.headers = {
-            ...(opts.headers || {}),
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-            ...(apiKey ? { 'X-API-Key': apiKey } : {}),
-        };
-        opts.credentials = 'include';
-    }
-    return _fetchOriginal(url, opts);
-};
-
-async function logout() {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    sessionStorage.clear();
-    window.location.href = '/login.html';
-}
-</script>
 </body>
 </html>

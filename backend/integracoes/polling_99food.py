@@ -137,7 +137,7 @@ def _loop():
 def iniciar_polling():
     """Inicia polling em thread daemon. Chamar no startup do Flask."""
     if not ENABLED:
-        print("[99Food] Polling desabilitado (POLLING_ENABLED=false no .env)")
+        # Removido o print para não poluir o log, já que o usuário configurou false
         return
     if not all([API_URL, API_KEY, STORE_ID]):
         print("[99Food] Credenciais incompletas — polling não iniciado")

@@ -17,11 +17,15 @@ def get_connection():
     return conn
 
 
+_pg_checked = False
 def criar_tabelas():
     """Cria todas as tabelas do sistema caso não existam (apenas SQLite)."""
+    global _pg_checked
     from db import is_postgres
     if is_postgres():
-        print("[OK] Usando Postgres (Supabase) — tabelas já existem, pulando criação.")
+        if not _pg_checked:
+            print("[OK] Usando Postgres (Supabase) — tabelas gerenciadas pelo Supabase.")
+            _pg_checked = True
         return
     conn = get_connection()
     cursor = conn.cursor()

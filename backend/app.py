@@ -48,9 +48,10 @@ def security_headers(response):
 def _start_polling():
     """Inicia o polling de plataformas em background de forma segura."""
     try:
-        from integracoes.polling_99food import iniciar_polling
+        from integracoes.polling_99food import iniciar_polling, ENABLED
         iniciar_polling()
-        print("[CMV] Polling 99Food ativado")
+        if ENABLED:
+            print("[CMV] Polling 99Food ativado")
     except Exception as e:
         print(f"[CMV] Polling não iniciado: {e}")
 
@@ -75,11 +76,24 @@ def status():
         polling_active = polling_running
     except:
         polling_active = False
+        
+    # Tentar conexão real com o banco
+    db_status = "unknown"
+    db_erro = None
+    try:
+        conn = get_connection()
+        conn.execute("SELECT 1").fetchone()
+        db_status = "connected"
+        conn.close()
+    except Exception as e:
+        db_status = "error"
+        db_erro = str(e)
 
     return jsonify({
         "status":   "online",
         "db_mode":  "postgresql" if is_postgres() else "sqlite",
-        "db_status": "connected",
+        "db_status": db_status,
+        "db_erro": db_erro,
         "polling_active": polling_active,
         "version":  "3.1"
     })
