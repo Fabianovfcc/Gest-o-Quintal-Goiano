@@ -124,6 +124,13 @@ def get_connection():
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = ssl.CERT_NONE
         
+        print(f"[DEBUG] URL parseada: {db_url}")
+        print(f"[DEBUG] Host: {parsed.hostname}")
+        print(f"[DEBUG] Port: {parsed.port}")
+        print(f"[DEBUG] User: {parsed.username}")
+        print(f"[DEBUG] Database: {parsed.path}")
+        print(f"[DEBUG] Tentando conectar ao Supabase...")
+        
         conn = pg8000.dbapi.connect(
             user=urllib.parse.unquote(parsed.username) if parsed.username else None,
             password=urllib.parse.unquote(parsed.password) if parsed.password else None,
