@@ -124,7 +124,7 @@ def get_connection():
             host=parsed.hostname,
             port=parsed.port or 5432,
             database=parsed.path.lstrip('/'),
-            ssl_context=True # Obriga SSL para conexões em nuvem
+            ssl_context=False  # Desativa verificação rigorosa de SSL (Railway + Supabase)
         )
         return PostgresCompatibleConnection(conn)
     else:
