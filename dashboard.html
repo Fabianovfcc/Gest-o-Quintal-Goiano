@@ -615,8 +615,11 @@ async function logout() {
                 }
 
                 // Gráfico
-                const vendas = await fetch(`${API}/dashboard/vendas-diarias`).then(r => r.json());
-                renderChart(vendas);
+                const vendasRes = await fetch(`${API}/dashboard/vendas-diarias`);
+                if (vendasRes.ok) {
+                    const vendas = await vendasRes.json();
+                    renderChart(vendas);
+                }
 
                 lucide.createIcons();
             } catch (err) {

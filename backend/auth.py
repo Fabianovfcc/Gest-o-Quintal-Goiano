@@ -30,11 +30,25 @@ def _is_dev():
 
 # ─── Verificação de API Key ───────────────────────────────────────────────────
 def _check_api_key() -> bool:
-    """Valida a API Key recebida no header X-API-Key ou query param api_key."""
+    """Valida a API Key ou um JWT de sessão válido."""
     if _is_dev() and not API_KEY:
-        return True  # Em dev sem key configurada, libera para facilitar testes locais
+        return True
+    
+    # 1. Tentar API Key (Header ou Query)
     key = request.headers.get("X-API-Key") or request.args.get("api_key", "")
-    return secrets.compare_digest(key, API_KEY)
+    if key and API_KEY and secrets.compare_digest(key, API_KEY):
+        return True
+        
+    # 2. Tentar JWT (Sessão Web)
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.replace("Bearer ", "").strip()
+    if not token:
+        token = request.cookies.get("cmv_session", "")
+    
+    if token and verificar_token(token):
+        return True
+        
+    return False
 
 
 # ─── Decorator: protege rotas com API Key ────────────────────────────────────
