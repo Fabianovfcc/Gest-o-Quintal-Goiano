@@ -125,8 +125,8 @@ def get_connection():
         ssl_ctx.verify_mode = ssl.CERT_NONE
         
         conn = pg8000.dbapi.connect(
-            user=parsed.username,
-            password=parsed.password,
+            user=urllib.parse.unquote(parsed.username) if parsed.username else None,
+            password=urllib.parse.unquote(parsed.password) if parsed.password else None,
             host=parsed.hostname,
             port=parsed.port or 5432,
             database=parsed.path.lstrip('/'),
