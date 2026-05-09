@@ -114,9 +114,15 @@ def get_connection():
     if _use_pg():
         import pg8000.dbapi
         import urllib.parse
+        import ssl
         
         db_url = os.getenv('SUPABASE_DB_URL')
         parsed = urllib.parse.urlparse(db_url)
+        
+        # Contexto SSL que permite conexão criptografada sem verificar certificado
+        ssl_ctx = ssl.create_default_context()
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = ssl.CERT_NONE
         
         conn = pg8000.dbapi.connect(
             user=parsed.username,
@@ -124,7 +130,7 @@ def get_connection():
             host=parsed.hostname,
             port=parsed.port or 5432,
             database=parsed.path.lstrip('/'),
-            ssl_context=False  # Desativa verificação rigorosa de SSL (Railway + Supabase)
+            ssl_context=ssl_ctx
         )
         return PostgresCompatibleConnection(conn)
     else:
