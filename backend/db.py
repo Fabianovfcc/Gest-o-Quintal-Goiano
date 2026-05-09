@@ -84,8 +84,13 @@ class PostgresCompatibleCursor:
         self.cursor.execute(_adapt_sql(sql), params)
         return self
         
-    def fetchone(self): return self.cursor.fetchone()
-    def fetchall(self): return self.cursor.fetchall()
+    def _dict_row(self, row):
+        if not row: return None
+        # Transforma a tupla retornada pelo pg8000 em um dicionário compatível com sqlite3.Row
+        return {desc[0]: val for desc, val in zip(self.cursor.description, row)}
+        
+    def fetchone(self): return self._dict_row(self.cursor.fetchone())
+    def fetchall(self): return [self._dict_row(row) for row in self.cursor.fetchall()]
     @property
     def lastrowid(self):
         # Tenta obter o último ID inserido via LASTVAL() se necessário
@@ -107,13 +112,20 @@ def _use_pg() -> bool:
 def get_connection():
     """Retorna conexão com o banco correto conforme ambiente."""
     if _use_pg():
-        import psycopg2, psycopg2.extras
+        import pg8000.dbapi
+        import urllib.parse
+        
         db_url = os.getenv('SUPABASE_DB_URL')
-        if "sslmode=" not in db_url:
-            db_url += "?sslmode=require"
-            
-        conn = psycopg2.connect(db_url)
-        conn.cursor_factory = psycopg2.extras.RealDictCursor
+        parsed = urllib.parse.urlparse(db_url)
+        
+        conn = pg8000.dbapi.connect(
+            user=parsed.username,
+            password=parsed.password,
+            host=parsed.hostname,
+            port=parsed.port or 5432,
+            database=parsed.path.lstrip('/'),
+            ssl_context=True # Obriga SSL para conexões em nuvem
+        )
         return PostgresCompatibleConnection(conn)
     else:
         os.makedirs(os.path.dirname(SQLITE_PATH), exist_ok=True)

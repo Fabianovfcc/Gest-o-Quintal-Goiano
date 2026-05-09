@@ -193,7 +193,7 @@ def serve_html(filename):
     allowed = [
         "dashboard.html", "rotina.html", "notas.html", "fichas.html", 
         "insumos.html", "estoque.html", "compras.html", "vendas.html", 
-        "desperdicio.html", "configuracoes.html"
+        "desperdicio.html", "configuracoes.html", "login.html"
     ]
     if filename in allowed:
         return send_from_directory(root_dir, filename)
